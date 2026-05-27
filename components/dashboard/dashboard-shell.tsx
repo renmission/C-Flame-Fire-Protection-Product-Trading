@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import type { NavGroup, NavItem } from "@/components/dashboard/dashboard-nav";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { UserMenu } from "@/components/dashboard/user-menu";
 import type { UserMenuUser } from "@/components/dashboard/user-menu";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { UserMenu } from "@/components/dashboard/user-menu";
 import { Tooltip } from "@/components/ui/tooltip";
+import { DotsHorizontalIcon } from "@/components/dashboard/sidebar-icons";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/ui-store";
 
@@ -37,8 +39,8 @@ const MenuIcon = () => (
 const CloseIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -55,8 +57,8 @@ const CloseIcon = () => (
 const PanelLeftCloseIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
+    width="18"
+    height="18"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -74,8 +76,8 @@ const PanelLeftCloseIcon = () => (
 const PanelLeftIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
+    width="18"
+    height="18"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -89,6 +91,131 @@ const PanelLeftIcon = () => (
     <path d="m13 9 3 3-3 3" />
   </svg>
 );
+
+function SidebarUserCard({
+  user,
+  collapsed,
+}: {
+  user: UserMenuUser;
+  collapsed: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  const initials = user.name
+    ? user.name
+        .trim()
+        .split(/\s+/)
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : (user.email?.slice(0, 2).toUpperCase() ?? "?");
+
+  const avatarEl = user.image ? (
+    <img
+      src={user.image}
+      alt=""
+      className="h-8 w-8 shrink-0 rounded-full object-cover"
+      referrerPolicy="no-referrer"
+    />
+  ) : (
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+      {initials}
+    </span>
+  );
+
+  return (
+    <div ref={ref} className="relative shrink-0 border-t border-border">
+      {collapsed ? (
+        <Tooltip content={user.name || user.email || "User"} side="right">
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            className="flex w-full items-center justify-center py-3 hover:bg-accent/50 transition-colors"
+            aria-label="User options"
+          >
+            {avatarEl}
+          </button>
+        </Tooltip>
+      ) : (
+        <div className="flex items-center gap-2.5 px-3 py-3">
+          {avatarEl}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <p className="truncate text-sm font-medium leading-none text-foreground">
+              {user.name || "User"}
+            </p>
+            {user.email && (
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">{user.email}</p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            aria-label="User options"
+          >
+            <DotsHorizontalIcon />
+          </button>
+        </div>
+      )}
+
+      {open && (
+        <div
+          className={cn(
+            "absolute z-50 rounded-lg border border-border bg-card py-1 shadow-lg",
+            collapsed
+              ? "bottom-0 left-full ml-2 w-52"
+              : "bottom-full left-1 right-1 mb-1"
+          )}
+          role="menu"
+        >
+          <div className="px-3 py-2">
+            <p className="truncate text-sm font-medium text-foreground">
+              {user.name || user.email || "User"}
+            </p>
+            {user.email && user.name && (
+              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+            )}
+          </div>
+          <div className="border-t border-border" />
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              router.push("/dashboard/profile");
+            }}
+            className="flex w-full items-center px-3 py-2 text-sm transition-colors hover:bg-accent"
+            role="menuitem"
+          >
+            Profile
+          </button>
+          <div className="px-3 py-1.5">
+            <ThemeToggle className="w-full justify-start" />
+          </div>
+          <div className="border-t border-border" />
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex w-full items-center px-3 py-2 text-sm transition-colors hover:bg-accent"
+            role="menuitem"
+          >
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function DashboardShell({
   topNavItems = [],
@@ -116,7 +243,6 @@ export function DashboardShell({
     };
   }, [sidebarOpen]);
 
-  /** Only close sidebar when navigating on mobile (drawer); leave desktop sidebar state unchanged */
   const handleNavNavigate = () => {
     if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
       closeSidebar();
@@ -125,7 +251,7 @@ export function DashboardShell({
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      {/* Top navbar — full width, always visible (reference: logo + section title left; actions + theme + user right) */}
+      {/* Top navbar */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
         <div className="flex min-w-0 items-center gap-3">
           <Button
@@ -151,8 +277,8 @@ export function DashboardShell({
               priority
               className="h-8 w-auto"
             />
-            <span className="font-semibold text-foreground hidden md:inline-block">
-              C'Flame Fire Protection Product Trading
+            <span className="hidden font-semibold text-foreground md:inline-block">
+              C&apos;Flame Fire Protection Product Trading
             </span>
           </Link>
         </div>
@@ -165,7 +291,7 @@ export function DashboardShell({
         </div>
       </header>
 
-      {/* Overlay — closes drawer when tapping outside on mobile */}
+      {/* Mobile overlay */}
       <div
         role="presentation"
         className={cn(
@@ -176,9 +302,8 @@ export function DashboardShell({
         aria-hidden
       />
 
-      {/* Main area: fixed height so only main content scrolls, not the page */}
       <div className="flex min-h-0 flex-1">
-        {/* Sidebar — drawer on mobile; on desktop expanded (w-56) or collapsed (w-16) with icons + toggle visible */}
+        {/* Sidebar */}
         <aside
           className={cn(
             "flex flex-col border-r border-border bg-sidebar transition-[transform,width] duration-200 ease-out",
@@ -186,6 +311,7 @@ export function DashboardShell({
             sidebarOpen ? "translate-x-0 md:w-56" : "-translate-x-full md:translate-x-0 md:w-16"
           )}
         >
+          {/* Sidebar header: toggle + mobile close */}
           <div className="flex h-14 shrink-0 items-center justify-between border-b border-border px-4 md:justify-end md:px-2">
             <Tooltip
               content={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
@@ -215,6 +341,8 @@ export function DashboardShell({
               <CloseIcon />
             </Button>
           </div>
+
+          {/* Nav */}
           <DashboardNav
             topItems={topNavItems}
             groups={navGroups}
@@ -222,74 +350,11 @@ export function DashboardShell({
             collapsed={!sidebarOpen}
           />
 
-          {/* Mobile: Theme toggle and user menu */}
-          <div className="mt-auto md:hidden">
-            <div className="border-t border-border" />
-            <div className="flex flex-col gap-1 px-3 py-2">
-              <ThemeToggle className="w-full justify-start" />
-              <div className="flex items-center gap-2 px-2 py-1.5">
-                {user.image ? (
-                  <img
-                    src={user.image}
-                    alt=""
-                    className="h-8 w-8 rounded-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
-                    {user.name
-                      ? user.name
-                          .trim()
-                          .split(/\s+/)
-                          .map((n) => n[0])
-                          .join("")
-                          .slice(0, 2)
-                          .toUpperCase()
-                      : user.email
-                        ? user.email.slice(0, 2).toUpperCase()
-                        : "?"}
-                  </span>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {user.name || user.email || "User"}
-                  </p>
-                  {user.email && user.name && (
-                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                  )}
-                </div>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={() => {
-                  signOut({ callbackUrl: "/login" });
-                  closeSidebar();
-                }}
-              >
-                Sign out
-              </Button>
-            </div>
-          </div>
-
-          <div
-            className={cn(
-              "mt-auto shrink-0 border-t border-border px-3 py-3 text-center text-xs text-muted-foreground",
-              !sidebarOpen && "md:px-0 md:py-2"
-            )}
-          >
-            {sidebarOpen ? (
-              <>© {new Date().getFullYear()} C'FLAME</>
-            ) : (
-              <span className="hidden md:inline" title={`© ${new Date().getFullYear()} C'FLAME`}>
-                ©
-              </span>
-            )}
-          </div>
+          {/* User profile card */}
+          <SidebarUserCard user={user} collapsed={!sidebarOpen} />
         </aside>
 
-        {/* Main content — full width, scrolls inside */}
+        {/* Main content */}
         <main className="min-h-0 min-w-0 flex-1 overflow-auto">
           <div className="w-full px-4 py-4 sm:px-6 sm:py-6">{children}</div>
         </main>

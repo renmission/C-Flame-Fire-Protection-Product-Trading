@@ -20,7 +20,8 @@
     "db:assign-departments": "tsx scripts/assign-departments.ts",
     "db:cleanup-payroll": "tsx scripts/cleanup-payroll.ts",
     "db:cleanup-deliveries": "tsx scripts/cleanup-deliveries.ts",
-    "db:backfill-delivery-creator": "tsx scripts/backfill-delivery-creator.ts"
+    "db:backfill-delivery-creator": "tsx scripts/backfill-delivery-creator.ts",
+    "db:seed:products": "tsx scripts/seed-fire-products.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,css,md}": "prettier --write"
