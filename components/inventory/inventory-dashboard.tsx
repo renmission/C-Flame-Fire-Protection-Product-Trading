@@ -1,0 +1,1229 @@
+"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  fetchProducts,
+  fetchMovements,
+  createProduct,
+  updateProduct,
+  archiveProduct,
+  createMovement,
+  uploadProductImage,
+  type ProductListItem,
+} from "@/lib/inventory-api";
+import type { ProductFormValues } from "@/schemas/inventory";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { getErrorMessage } from "@/lib/errors";
+import { PERMISSIONS } from "@/lib/auth/permissions";
+import { can, type SessionUser } from "@/lib/auth/permissions";
+
+const PRODUCTS_QUERY_KEY = ["inventory", "products"];
+const MOVEMENTS_QUERY_KEY = ["inventory", "movements"];
+
+type Tab = "products" | "movements";
+
+type ProductSortBy =
+  | "name"
+  | "sku"
+  | "category"
+  | "quantity"
+  | "unit"
+  | "listPrice"
+  | "reorderLevel"
+  | "createdAt";
+type MovementSortBy = "createdAt" | "type" | "quantity" | "productName";
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
+
+const IconMoreVertical = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    <circle cx="12" cy="6" r="1.5" />
+    <circle cx="12" cy="12" r="1.5" />
+    <circle cx="12" cy="18" r="1.5" />
+  </svg>
+);
+
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
+
+export function InventoryDashboard({ user }: { user: SessionUser | null }) {
+  const canWrite = user ? can(user, PERMISSIONS.INVENTORY_WRITE) : false;
+  const [tab, setTab] = useState<Tab>("products");
+  const [productSearch, setProductSearch] = useState("");
+  const [productPage, setProductPage] = useState(1);
+  const [productLimit, setProductLimit] = useState(20);
+  const [productSortBy, setProductSortBy] = useState<ProductSortBy>("name");
+  const [productSortOrder, setProductSortOrder] = useState<"asc" | "desc">("asc");
+  const [productArchived, setProductArchived] = useState<"all" | "active" | "archived">("active");
+  const [productStockStatus, setProductStockStatus] = useState<"all" | "low_stock">("all");
+  const [productCategory, setProductCategory] = useState("");
+  const [movementSearch, setMovementSearch] = useState("");
+  const [movementPage, setMovementPage] = useState(1);
+  const [movementLimit, setMovementLimit] = useState(20);
+  const [movementType, setMovementType] = useState<"all" | "in" | "out" | "adjustment">("all");
+  const [movementSortBy, setMovementSortBy] = useState<MovementSortBy>("createdAt");
+  const [movementSortOrder, setMovementSortOrder] = useState<"asc" | "desc">("desc");
+  const [productDialog, setProductDialog] = useState<"create" | ProductListItem | null>(null);
+  const [movementDialog, setMovementDialog] = useState<ProductListItem | null>(null);
+
+  const debouncedProductSearch = useDebouncedValue(productSearch, 300);
+  const debouncedMovementSearch = useDebouncedValue(movementSearch, 300);
+
+  const queryClient = useQueryClient();
+
+  const { data: productsData, isLoading: productsLoading } = useQuery({
+    queryKey: [
+      ...PRODUCTS_QUERY_KEY,
+      {
+        search: debouncedProductSearch,
+        page: productPage,
+        limit: productLimit,
+        sortBy: productSortBy,
+        sortOrder: productSortOrder,
+        archived:
+          productArchived === "archived" ? true : productArchived === "active" ? false : undefined,
+        category: productCategory.trim() || undefined,
+        stockStatus: productStockStatus,
+      },
+    ],
+    queryFn: () =>
+      fetchProducts({
+        search: debouncedProductSearch.trim() || undefined,
+        page: productPage,
+        limit: productLimit,
+        sortBy: productSortBy,
+        sortOrder: productSortOrder,
+        archived:
+          productArchived === "archived" ? true : productArchived === "active" ? false : undefined,
+        category: productCategory.trim() || undefined,
+        stockStatus: productStockStatus,
+      }),
+  });
+
+  const { data: categoriesData } = useQuery({
+    queryKey: ["settings", "categories"],
+    queryFn: async () => {
+      const res = await fetch("/api/settings/categories");
+      if (!res.ok) return [];
+      const json = await res.json();
+      return (json.data ?? []) as { id: string; name: string }[];
+    },
+    retry: false,
+    staleTime: 60_000,
+  });
+  const { data: unitsData } = useQuery({
+    queryKey: ["settings", "units"],
+    queryFn: async () => {
+      const res = await fetch("/api/settings/units");
+      if (!res.ok) return [];
+      const json = await res.json();
+      return (json.data ?? []) as { id: string; name: string }[];
+    },
+    retry: false,
+    staleTime: 60_000,
+  });
+  const categories = categoriesData?.map((c) => c.name) ?? [];
+  const units = unitsData?.map((u) => u.name) ?? [];
+
+  const { data: movementsData, isLoading: movementsLoading } = useQuery({
+    queryKey: [
+      ...MOVEMENTS_QUERY_KEY,
+      {
+        search: debouncedMovementSearch,
+        page: movementPage,
+        limit: movementLimit,
+        type: movementType === "all" ? undefined : movementType,
+        sortBy: movementSortBy,
+        sortOrder: movementSortOrder,
+      },
+    ],
+    queryFn: () =>
+      fetchMovements({
+        search: debouncedMovementSearch.trim() || undefined,
+        page: movementPage,
+        limit: movementLimit,
+        type: movementType === "all" ? undefined : movementType,
+        sortBy: movementSortBy,
+        sortOrder: movementSortOrder,
+      }),
+  });
+
+  const products = productsData?.data ?? [];
+  const totalProducts = productsData?.total ?? 0;
+  const totalProductPages = Math.ceil(totalProducts / productLimit) || 1;
+  // Future: show low-stock count/alerts in the notification bell (header).
+  const movements = movementsData?.data ?? [];
+  const totalMovements = movementsData?.total ?? 0;
+  const totalMovementPages = Math.ceil(totalMovements / movementLimit) || 1;
+
+  const handleProductSort = useCallback((column: ProductSortBy) => {
+    setProductSortBy((prev) => {
+      if (prev === column) {
+        setProductSortOrder((o) => (o === "asc" ? "desc" : "asc"));
+        return prev;
+      }
+      setProductSortOrder("asc");
+      return column;
+    });
+    setProductPage(1);
+  }, []);
+
+  const handleMovementSort = useCallback((column: MovementSortBy) => {
+    setMovementSortBy((prev) => {
+      if (prev === column) {
+        setMovementSortOrder((o) => (o === "asc" ? "desc" : "asc"));
+        return prev;
+      }
+      setMovementSortOrder(column === "createdAt" ? "desc" : "asc");
+      return column;
+    });
+    setMovementPage(1);
+  }, []);
+
+  const createProductMutation = useMutation({
+    mutationFn: createProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      setProductDialog(null);
+    },
+  });
+
+  const updateProductMutation = useMutation({
+    mutationFn: ({ id, body }: { id: string; body: ProductFormValues }) => updateProduct(id, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      setProductDialog(null);
+    },
+  });
+
+  const archiveProductMutation = useMutation({
+    mutationFn: archiveProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      setProductDialog(null);
+    },
+  });
+
+  const createMovementMutation = useMutation({
+    mutationFn: createMovement,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: MOVEMENTS_QUERY_KEY });
+      setMovementDialog(null);
+    },
+  });
+
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-xl font-semibold sm:text-2xl">Inventory</h1>
+        {canWrite && (
+          <Button
+            onClick={() => setProductDialog("create")}
+            className="w-full min-h-11 touch-manipulation sm:w-auto sm:min-h-0"
+          >
+            Add product
+          </Button>
+        )}
+      </div>
+
+      <div className="border-b border-border overflow-x-auto">
+        <div className="flex gap-0 min-w-0" role="tablist" aria-label="Inventory sections">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "products"}
+            className={`min-h-11 touch-manipulation flex-shrink-0 rounded-t-md border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              tab === "products"
+                ? "border-primary bg-muted/50 text-foreground"
+                : "border-transparent text-muted-foreground hover:bg-muted/30 hover:text-foreground"
+            }`}
+            onClick={() => setTab("products")}
+          >
+            Products
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "movements"}
+            className={`min-h-11 touch-manipulation flex-shrink-0 rounded-t-md border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              tab === "movements"
+                ? "border-primary bg-muted/50 text-foreground"
+                : "border-transparent text-muted-foreground hover:bg-muted/30 hover:text-foreground"
+            }`}
+            onClick={() => setTab("movements")}
+          >
+            Movement history
+          </button>
+        </div>
+      </div>
+
+      {tab === "products" && (
+        <Card>
+          <CardHeader className="pb-4 p-4 sm:p-6">
+            <div className="space-y-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+                <Input
+                  placeholder="Search by name, SKU, category..."
+                  value={productSearch}
+                  onChange={(e) => {
+                    setProductSearch(e.target.value);
+                    setProductPage(1);
+                  }}
+                  className="w-full min-h-11 touch-manipulation sm:max-w-xs sm:min-h-0"
+                  aria-label="Search products"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <select
+                    className="input-select w-full min-h-11 touch-manipulation sm:w-auto sm:min-w-[8rem] sm:min-h-0"
+                    value={productArchived}
+                    onChange={(e) => {
+                      setProductArchived(e.target.value as "all" | "active" | "archived");
+                      setProductPage(1);
+                    }}
+                    aria-label="Filter by status"
+                  >
+                    <option value="active">Active</option>
+                    <option value="archived">Archived</option>
+                    <option value="all">All</option>
+                  </select>
+                  <select
+                    className="input-select w-full min-h-11 touch-manipulation sm:w-auto sm:min-w-[8rem] sm:min-h-0"
+                    value={productStockStatus}
+                    onChange={(e) => {
+                      setProductStockStatus(e.target.value as "all" | "low_stock");
+                      setProductPage(1);
+                    }}
+                    aria-label="Filter by stock status"
+                  >
+                    <option value="all">All stock</option>
+                    <option value="low_stock">Low stock only</option>
+                  </select>
+                  <select
+                    className="input-select w-full min-h-11 touch-manipulation sm:w-auto sm:min-w-[10rem] sm:min-h-0"
+                    value={productCategory}
+                    onChange={(e) => {
+                      setProductCategory(e.target.value);
+                      setProductPage(1);
+                    }}
+                    aria-label="Filter by category"
+                  >
+                    <option value="">All categories</option>
+                    {categories.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                    {productCategory.trim() && !categories.includes(productCategory) && (
+                      <option value={productCategory}>{productCategory}</option>
+                    )}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+            {productsLoading ? (
+              <p className="text-muted-foreground">Loading…</p>
+            ) : (
+              <>
+                <div className="overflow-x-auto rounded-md border border-border">
+                  <Table>
+                    <colgroup>
+                      <col style={{ width: "5%" }} />
+                      <col style={{ width: canWrite ? "21%" : "25%" }} />
+                      <col style={{ width: canWrite ? "12%" : "14%" }} />
+                      <col style={{ width: canWrite ? "14%" : "16%" }} />
+                      <col style={{ width: canWrite ? "9%" : "10%" }} />
+                      <col style={{ width: canWrite ? "7%" : "8%" }} />
+                      <col style={{ width: canWrite ? "11%" : "12%" }} />
+                      <col style={{ width: canWrite ? "9%" : "10%" }} />
+                      {canWrite && <col style={{ width: "8%" }} />}
+                    </colgroup>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="px-2 w-0" />
+                        <TableHead>
+                          <SortableHeader
+                            label="Name"
+                            currentSort={productSortBy}
+                            sortKey="name"
+                            order={productSortOrder}
+                            onSort={() => handleProductSort("name")}
+                          />
+                        </TableHead>
+                        <TableHead>
+                          <SortableHeader
+                            label="SKU"
+                            currentSort={productSortBy}
+                            sortKey="sku"
+                            order={productSortOrder}
+                            onSort={() => handleProductSort("sku")}
+                          />
+                        </TableHead>
+                        <TableHead>
+                          <SortableHeader
+                            label="Category"
+                            currentSort={productSortBy}
+                            sortKey="category"
+                            order={productSortOrder}
+                            onSort={() => handleProductSort("category")}
+                          />
+                        </TableHead>
+                        <TableHead>
+                          <SortableHeader
+                            label="Quantity"
+                            currentSort={productSortBy}
+                            sortKey="quantity"
+                            order={productSortOrder}
+                            onSort={() => handleProductSort("quantity")}
+                          />
+                        </TableHead>
+                        <TableHead>
+                          <SortableHeader
+                            label="Unit"
+                            currentSort={productSortBy}
+                            sortKey="unit"
+                            order={productSortOrder}
+                            onSort={() => handleProductSort("unit")}
+                          />
+                        </TableHead>
+                        <TableHead>
+                          <SortableHeader
+                            label="Price"
+                            currentSort={productSortBy}
+                            sortKey="listPrice"
+                            order={productSortOrder}
+                            onSort={() => handleProductSort("listPrice")}
+                          />
+                        </TableHead>
+                        <TableHead>
+                          <SortableHeader
+                            label="Reorder"
+                            currentSort={productSortBy}
+                            sortKey="reorderLevel"
+                            order={productSortOrder}
+                            onSort={() => handleProductSort("reorderLevel")}
+                          />
+                        </TableHead>
+                        {canWrite && (
+                          <TableHead className="w-0 px-2 text-center">Actions</TableHead>
+                        )}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {products.length === 0 ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={canWrite ? 9 : 8}
+                            className="text-center text-muted-foreground py-8"
+                          >
+                            No products found.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        products.map((p) => (
+                          <TableRow key={p.id}>
+                            <TableCell className="px-2">
+                              {p.imageUrl ? (
+                                <img
+                                  src={p.imageUrl}
+                                  alt={p.name}
+                                  className="h-10 w-10 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center text-sm font-semibold text-muted-foreground">
+                                  {p.name.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell className="font-medium">{p.name}</TableCell>
+                            <TableCell>{p.sku}</TableCell>
+                            <TableCell>{p.category ?? "—"}</TableCell>
+                            <TableCell>
+                              <span
+                                className={
+                                  p.lowStock ? "font-medium text-amber-600 dark:text-amber-400" : ""
+                                }
+                              >
+                                {p.quantity}
+                              </span>
+                            </TableCell>
+                            <TableCell>{p.unit}</TableCell>
+                            <TableCell>
+                              {p.listPrice != null && p.listPrice !== ""
+                                ? `₱${Number(p.listPrice).toFixed(2)}`
+                                : "—"}
+                            </TableCell>
+                            <TableCell>{p.reorderLevel}</TableCell>
+                            {canWrite && (
+                              <TableCell className="whitespace-nowrap px-2 text-center">
+                                <ProductRowActions
+                                  onStock={() => setMovementDialog(p)}
+                                  onEdit={() => setProductDialog(p)}
+                                  onArchive={() => {
+                                    if (
+                                      confirm(`Archive "${p.name}"? You can filter archived later.`)
+                                    )
+                                      archiveProductMutation.mutate(p.id);
+                                  }}
+                                  isArchived={p.archived === 1}
+                                />
+                              </TableCell>
+                            )}
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <TablePagination
+                  page={productPage}
+                  totalPages={totalProductPages}
+                  totalItems={totalProducts}
+                  limit={productLimit}
+                  limitOptions={PAGE_SIZE_OPTIONS}
+                  onPageChange={setProductPage}
+                  onLimitChange={(l) => {
+                    setProductLimit(l);
+                    setProductPage(1);
+                  }}
+                />
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {tab === "movements" && (
+        <Card>
+          <CardHeader className="pb-4 p-4 sm:p-6">
+            <div className="space-y-3">
+              <CardTitle className="text-base">Movement history</CardTitle>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+                <Input
+                  placeholder="Search by product name or SKU..."
+                  value={movementSearch}
+                  onChange={(e) => {
+                    setMovementSearch(e.target.value);
+                    setMovementPage(1);
+                  }}
+                  className="w-full min-h-11 touch-manipulation sm:max-w-xs sm:min-h-0"
+                  aria-label="Search movements"
+                />
+                <select
+                  className="input-select w-full min-h-11 touch-manipulation sm:w-auto sm:min-w-[8rem] sm:min-h-0"
+                  value={movementType}
+                  onChange={(e) => {
+                    setMovementType(e.target.value as "all" | "in" | "out" | "adjustment");
+                    setMovementPage(1);
+                  }}
+                  aria-label="Filter by type"
+                >
+                  <option value="all">All types</option>
+                  <option value="in">Received</option>
+                  <option value="out">Out</option>
+                  <option value="adjustment">Adjustment</option>
+                </select>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+            {movementsLoading ? (
+              <p className="text-muted-foreground">Loading…</p>
+            ) : (
+              <>
+                <div className="overflow-x-auto rounded-md border border-border">
+                  <Table>
+                    <colgroup>
+                      <col style={{ width: "16%" }} />
+                      <col style={{ width: "28%" }} />
+                      <col style={{ width: "12%" }} />
+                      <col style={{ width: "10%" }} />
+                      <col style={{ width: "18%" }} />
+                      <col style={{ width: "16%" }} />
+                    </colgroup>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>
+                          <SortableHeader
+                            label="Date"
+                            currentSort={movementSortBy}
+                            sortKey="createdAt"
+                            order={movementSortOrder}
+                            onSort={() => handleMovementSort("createdAt")}
+                          />
+                        </TableHead>
+                        <TableHead>
+                          <SortableHeader
+                            label="Product"
+                            currentSort={movementSortBy}
+                            sortKey="productName"
+                            order={movementSortOrder}
+                            onSort={() => handleMovementSort("productName")}
+                          />
+                        </TableHead>
+                        <TableHead>
+                          <SortableHeader
+                            label="Type"
+                            currentSort={movementSortBy}
+                            sortKey="type"
+                            order={movementSortOrder}
+                            onSort={() => handleMovementSort("type")}
+                          />
+                        </TableHead>
+                        <TableHead className="text-right">
+                          <SortableHeader
+                            label="Qty"
+                            currentSort={movementSortBy}
+                            sortKey="quantity"
+                            order={movementSortOrder}
+                            onSort={() => handleMovementSort("quantity")}
+                            className="justify-end"
+                          />
+                        </TableHead>
+                        <TableHead>Reference</TableHead>
+                        <TableHead>Note</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {movements.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                            No movements found.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        movements.map((m) => (
+                          <TableRow key={m.id}>
+                            <TableCell className="text-muted-foreground whitespace-nowrap">
+                              {new Date(m.createdAt).toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                              {m.productName} ({m.productSku})
+                            </TableCell>
+                            <TableCell>
+                              {MOVEMENT_TYPE_LABELS[m.type as keyof typeof MOVEMENT_TYPE_LABELS] ??
+                                m.type}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {m.quantity > 0 ? `+${m.quantity}` : m.quantity}
+                            </TableCell>
+                            <TableCell>{m.reference ?? "—"}</TableCell>
+                            <TableCell>{m.note ?? "—"}</TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <TablePagination
+                  page={movementPage}
+                  totalPages={totalMovementPages}
+                  totalItems={totalMovements}
+                  limit={movementLimit}
+                  limitOptions={PAGE_SIZE_OPTIONS}
+                  onPageChange={setMovementPage}
+                  onLimitChange={(l) => {
+                    setMovementLimit(l);
+                    setMovementPage(1);
+                  }}
+                />
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {productDialog !== null && (
+        <ProductFormDialog
+          product={productDialog === "create" ? null : productDialog}
+          categories={categories}
+          units={units}
+          onClose={() => setProductDialog(null)}
+          onSubmit={(body) => {
+            if (productDialog === "create") {
+              createProductMutation.mutate(body);
+            } else {
+              updateProductMutation.mutate({
+                id: productDialog.id,
+                body,
+              });
+            }
+          }}
+          isSubmitting={createProductMutation.isPending || updateProductMutation.isPending}
+        />
+      )}
+
+      {movementDialog && (
+        <MovementFormDialog
+          product={movementDialog}
+          onClose={() => {
+            createMovementMutation.reset();
+            setMovementDialog(null);
+          }}
+          onSubmit={(body) => createMovementMutation.mutate(body)}
+          isSubmitting={createMovementMutation.isPending}
+          error={
+            createMovementMutation.error ? getErrorMessage(createMovementMutation.error) : null
+          }
+        />
+      )}
+    </div>
+  );
+}
+
+function ProductRowActions({
+  onStock,
+  onEdit,
+  onArchive,
+  isArchived,
+}: {
+  onStock: () => void;
+  onEdit: () => void;
+  onArchive: () => void;
+  isArchived: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  return (
+    <div className="relative inline-block" ref={ref}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-label="Actions"
+        aria-expanded={open}
+      >
+        <IconMoreVertical />
+      </Button>
+      {open && (
+        <div
+          className="absolute right-0 top-full z-50 mt-1 flex min-w-[8rem] flex-col rounded-md border border-border bg-card py-1 shadow-lg"
+          role="menu"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
+            onClick={() => {
+              onStock();
+              setOpen(false);
+            }}
+          >
+            Stock
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
+            onClick={() => {
+              onEdit();
+              setOpen(false);
+            }}
+          >
+            Edit
+          </button>
+          {!isArchived && (
+            <button
+              type="button"
+              role="menuitem"
+              className="block w-full px-3 py-2 text-left text-sm text-destructive hover:bg-muted"
+              onClick={() => {
+                onArchive();
+                setOpen(false);
+              }}
+            >
+              Archive
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SortableHeader<T extends string>({
+  label,
+  currentSort,
+  sortKey,
+  order,
+  onSort,
+  className,
+}: {
+  label: string;
+  currentSort: T;
+  sortKey: T;
+  order: "asc" | "desc";
+  onSort: () => void;
+  className?: string;
+}) {
+  const isActive = currentSort === sortKey;
+  return (
+    <button
+      type="button"
+      onClick={onSort}
+      className={`inline-flex items-center gap-1 font-medium hover:text-foreground ${className ?? ""}`}
+      aria-sort={isActive ? (order === "asc" ? "ascending" : "descending") : undefined}
+    >
+      {label}
+      {isActive ? (order === "asc" ? " ↑" : " ↓") : ""}
+    </button>
+  );
+}
+
+function TablePagination({
+  page,
+  totalPages,
+  totalItems,
+  limit,
+  limitOptions,
+  onPageChange,
+  onLimitChange,
+}: {
+  page: number;
+  totalPages: number;
+  totalItems: number;
+  limit: number;
+  limitOptions: readonly number[];
+  onPageChange: (p: number) => void;
+  onLimitChange: (l: number) => void;
+}) {
+  const from = totalItems === 0 ? 0 : (page - 1) * limit + 1;
+  const to = Math.min(page * limit, totalItems);
+
+  return (
+    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        <span>
+          Showing {from}–{to} of {totalItems}
+        </span>
+        <select
+          className="input-select h-8 w-auto min-w-0 py-1 text-xs"
+          value={limit}
+          onChange={(e) => onLimitChange(Number(e.target.value))}
+          aria-label="Rows per page"
+        >
+          {limitOptions.map((n) => (
+            <option key={n} value={n}>
+              {n} per page
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="min-h-9"
+          disabled={page <= 1}
+          onClick={() => onPageChange(page - 1)}
+        >
+          Previous
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          Page {page} of {totalPages}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          className="min-h-9"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(page + 1)}
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ProductFormDialog({
+  product,
+  categories,
+  units,
+  onClose,
+  onSubmit,
+  isSubmitting,
+}: {
+  product: ProductListItem | null;
+  categories: string[];
+  units: string[];
+  onClose: () => void;
+  onSubmit: (body: ProductFormValues) => void;
+  isSubmitting: boolean;
+}) {
+  const [name, setName] = useState(product?.name ?? "");
+  const [sku, setSku] = useState(product?.sku ?? "");
+  const [category, setCategory] = useState(product?.category ?? "");
+  const [unit, setUnit] = useState(product?.unit ?? (units.length > 0 ? units[0] : "pcs"));
+  const [listPrice, setListPrice] = useState(
+    product?.listPrice != null && product.listPrice !== "" ? String(product.listPrice) : ""
+  );
+  const [reorderLevel, setReorderLevel] = useState(String(product?.reorderLevel ?? 0));
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(product?.imageUrl ?? null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const categoryOptions: string[] = [
+    ...new Set([...categories, product?.category].filter((x): x is string => Boolean(x))),
+  ];
+  const unitOptions: string[] = [
+    ...new Set([...units, product?.unit ?? "pcs"].filter((x): x is string => Boolean(x))),
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    let resolvedImageUrl = product?.imageUrl ?? null;
+    if (imageFile) {
+      setImageUploading(true);
+      try {
+        resolvedImageUrl = await uploadProductImage(imageFile);
+      } finally {
+        setImageUploading(false);
+      }
+    }
+    onSubmit({
+      name: name.trim(),
+      sku: sku.trim(),
+      category: category.trim() || undefined,
+      unit: unit.trim(),
+      listPrice: listPrice.trim() ? parseFloat(listPrice) || undefined : undefined,
+      reorderLevel: Math.max(0, parseInt(reorderLevel, 10) || 0),
+      imageUrl: resolvedImageUrl,
+      archived: product?.archived === 1 ? 1 : 0,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 sm:p-6">
+      <Card className="w-full max-w-md max-h-[90vh] flex flex-col shadow-xl">
+        <CardHeader className="flex flex-row items-center justify-between shrink-0 p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">
+            {product ? "Edit product" : "New product"}
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 touch-manipulation sm:h-9 sm:w-9"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <span className="text-xl font-semibold leading-none sm:text-2xl">×</span>
+          </Button>
+        </CardHeader>
+        <CardContent className="overflow-y-auto p-4 pt-0 sm:p-6 sm:pt-0">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label>Image</Label>
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="preview"
+                  className="mb-2 h-20 w-20 rounded object-cover"
+                />
+              )}
+              <Input
+                type="file"
+                accept="image/*"
+                className="mt-2 cursor-pointer"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setImageFile(file);
+                  setImagePreview(URL.createObjectURL(file));
+                }}
+              />
+            </div>
+            <div>
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div>
+              <Label htmlFor="sku">SKU</Label>
+              <Input
+                id="sku"
+                value={sku}
+                onChange={(e) => setSku(e.target.value)}
+                required
+                disabled={!!product}
+              />
+            </div>
+            <div>
+              <Label htmlFor="category">Category</Label>
+              {categoryOptions.length > 0 ? (
+                <select
+                  id="category"
+                  className="input-select mt-2 w-full"
+                  value={category ?? ""}
+                  onChange={(e) => setCategory(e.target.value)}
+                  aria-label="Category"
+                >
+                  <option value="">—</option>
+                  {categoryOptions.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <Input
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="mt-2"
+                />
+              )}
+            </div>
+            <div>
+              <Label htmlFor="unit">Unit</Label>
+              {unitOptions.length > 0 ? (
+                <select
+                  id="unit"
+                  className="input-select mt-2 w-full"
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                  required
+                  aria-label="Unit"
+                >
+                  {unitOptions.map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <Input
+                  id="unit"
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                  placeholder="pcs, kg, bag..."
+                  required
+                  className="mt-2"
+                />
+              )}
+            </div>
+            <div>
+              <Label htmlFor="listPrice">Price (list)</Label>
+              <Input
+                id="listPrice"
+                type="number"
+                min={0}
+                step={0.01}
+                placeholder="0.00"
+                value={listPrice}
+                onChange={(e) => setListPrice(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="reorderLevel">Reorder level</Label>
+              <Input
+                id="reorderLevel"
+                type="number"
+                min={0}
+                value={reorderLevel}
+                onChange={(e) => setReorderLevel(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="min-h-11 touch-manipulation sm:min-h-0"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting || imageUploading}
+                className="min-h-11 touch-manipulation sm:min-h-0"
+              >
+                {imageUploading ? "Uploading…" : product ? "Save" : "Create"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+const MOVEMENT_TYPE_LABELS: Record<"in" | "out" | "adjustment", string> = {
+  in: "Received",
+  out: "Out",
+  adjustment: "Adjustment",
+};
+
+function MovementFormDialog({
+  product,
+  onClose,
+  onSubmit,
+  isSubmitting,
+  error,
+}: {
+  product: ProductListItem;
+  onClose: () => void;
+  onSubmit: (body: {
+    productId: string;
+    type: "in" | "out" | "adjustment";
+    quantity: number;
+    reference?: string;
+    note?: string;
+  }) => void;
+  isSubmitting: boolean;
+  error?: string | null;
+}) {
+  const [type, setType] = useState<"in" | "out" | "adjustment">("in");
+  const [quantity, setQuantity] = useState("");
+  const [reference, setReference] = useState("");
+  const [note, setNote] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = parseInt(quantity, 10);
+    if (Number.isNaN(q)) return;
+    if (type !== "adjustment" && q <= 0) return;
+    if (type === "adjustment" && q === 0) return;
+    const payloadQty = type === "adjustment" ? q : Math.abs(q);
+    onSubmit({
+      productId: product.id,
+      type,
+      quantity: payloadQty,
+      reference: reference.trim() || undefined,
+      note: note.trim() || undefined,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 sm:p-6">
+      <Card className="w-full max-w-md max-h-[90vh] flex flex-col shadow-xl">
+        <CardHeader className="flex flex-row items-center justify-between shrink-0 p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl truncate pr-2">
+            Stock movement — {product.name}
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 touch-manipulation shrink-0 sm:h-9 sm:w-9"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <span className="text-xl font-semibold leading-none sm:text-2xl">×</span>
+          </Button>
+        </CardHeader>
+        <CardContent className="overflow-y-auto p-4 pt-0 sm:p-6 sm:pt-0">
+          <p className="mb-4 text-sm text-muted-foreground">
+            Current stock: {product.quantity} {product.unit}
+          </p>
+          {error && (
+            <p
+              className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label>Type</Label>
+              <select
+                className="input-select mt-2 min-h-11 touch-manipulation sm:min-h-0"
+                value={type}
+                onChange={(e) => setType(e.target.value as "in" | "out" | "adjustment")}
+                aria-label="Movement type"
+              >
+                <option value="in">Received</option>
+                <option value="out">Out</option>
+                <option value="adjustment">Adjustment (+ or -)</option>
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="qty">
+                Quantity {type === "adjustment" ? "(positive or negative)" : ""}
+              </Label>
+              <Input
+                id="qty"
+                type="number"
+                step={type === "adjustment" ? "1" : "1"}
+                min={type === "adjustment" ? undefined : 1}
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="ref">Reference</Label>
+              <Input
+                id="ref"
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                placeholder="PO number, order ID..."
+              />
+            </div>
+            <div>
+              <Label htmlFor="note">Note</Label>
+              <Input id="note" value={note} onChange={(e) => setNote(e.target.value)} />
+            </div>
+            <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="min-h-11 touch-manipulation sm:min-h-0"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="min-h-11 touch-manipulation sm:min-h-0"
+              >
+                Record
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

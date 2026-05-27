@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Modern palette: Blue (primary), Red (secondary), Yellow (accent)
+   Hex ref: #2563EB, #DC2626, #EAB308 */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    /* Blue #2563EB - primary brand */
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    /* Red tint #FEF2F2 - secondary surfaces */
+    --secondary: 0 86% 97%;
+    --secondary-foreground: 0 63% 31%;
+    --muted: 48 33% 97%;
+    --muted-foreground: 222 13% 46%;
+    /* Yellow tint #FEFCE8 - accent surfaces */
+    --accent: 54 91% 95%;
+    --accent-foreground: 48 96% 25%;
+    /* Red #DC2626 - destructive */
+    --destructive: 0 73% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+    --radius: 0.5rem;
+    --sidebar: 221 40% 97%;
+  }
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+    /* Blue #60A5FA - primary in dark */
+    --primary: 213 94% 68%;
+    --primary-foreground: 222 47% 11%;
+    /* Red tint - secondary in dark */
+    --secondary: 0 32% 18%;
+    --secondary-foreground: 0 86% 90%;
+    --muted: 48 15% 18%;
+    --muted-foreground: 215 20% 65%;
+    /* Yellow tint - accent in dark */
+    --accent: 48 40% 22%;
+    --accent-foreground: 48 96% 70%;
+    --destructive: 0 63% 41%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 213 94% 68%;
+    --sidebar: 222 47% 5%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+/* Native select styled to match Input component */
+@layer components {
+  .input-select {
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Ensure select dropdowns open downward and have readable text */
+  select {
+    font-size: 16px !important;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  select option {
+    font-size: 16px !important;
+    padding: 12px 8px !important;
+    line-height: 1.5 !important;
+    min-height: 44px !important; /* iOS recommended touch target */
+  }
+
+  /* Mobile-specific improvements for select dropdowns - option text matches select box text */
+  @media (max-width: 640px) {
+    select {
+      font-size: 16px !important; /* Select box text size */
+    }
+
+    select option {
+      font-size: 16px !important; /* Same font size as select box text */
+      padding: 14px 12px !important;
+      line-height: 1.5 !important;
+      min-height: 48px !important; /* Better touch target */
+    }
+  }
+}
