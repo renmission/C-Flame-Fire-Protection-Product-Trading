@@ -234,7 +234,8 @@ async function seed() {
 
     const userRolesList = userRoleRows.map((r) => r.roleName).filter(Boolean);
     const isAdmin = userRolesList.includes(ROLES.ADMIN);
-    if (isAdmin) continue;
+    const isCustomer = userRolesList.includes(ROLES.CUSTOMER);
+    if (isAdmin || isCustomer) continue;
 
     const existingEmployee = await db
       .select()
