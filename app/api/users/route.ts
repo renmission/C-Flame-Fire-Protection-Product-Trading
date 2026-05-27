@@ -5,7 +5,7 @@ import { getSessionOr401, requirePermission } from "@/lib/api-auth";
 import { PERMISSIONS, ROLES } from "@/lib/auth/permissions";
 import { withRouteErrorHandling } from "@/lib/errors";
 import { usersListQuerySchema, userCreateSchema } from "@/schemas/users";
-import { and, asc, desc, eq, ilike, or, sql, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, or, sql, inArray, notInArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { logUserAudit } from "@/lib/audit";
 
@@ -46,6 +46,24 @@ export async function GET(req: NextRequest) {
             : asc(users.name);
 
   const conditions = [];
+
+  // Always exclude customer-role users from the staff user management list
+  const [customerRoleRow] = await db
+    .select({ id: roles.id })
+    .from(roles)
+    .where(eq(roles.name, ROLES.CUSTOMER))
+    .limit(1);
+
+  if (customerRoleRow) {
+    const customerUserIds = await db
+      .select({ userId: userRoles.userId })
+      .from(userRoles)
+      .where(eq(userRoles.roleId, customerRoleRow.id));
+    const ids = customerUserIds.map((r) => r.userId).filter(Boolean);
+    if (ids.length > 0) {
+      conditions.push(notInArray(users.id, ids));
+    }
+  }
   if (q.search?.trim()) {
     conditions.push(
       or(

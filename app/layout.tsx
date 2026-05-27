@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Oswald, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
+
+const oswald = Oswald({
+  subsets: ["latin"],
+  variable: "--font-oswald",
+  weight: ["400", "600", "700"],
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+});
 
 export const metadata: Metadata = {
   title: "C'FLAME",
@@ -18,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased" suppressHydrationWarning>
+      <body className={`antialiased ${oswald.variable} ${dmSans.variable}`} suppressHydrationWarning>
         <Script
           id="theme-init"
           strategy="beforeInteractive"

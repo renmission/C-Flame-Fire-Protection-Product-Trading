@@ -1,8 +1,7 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,38 +9,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
-  const registered = searchParams.get("registered") === "1";
-
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-    setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const confirm = formData.get("confirm") as string;
 
+    if (password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
       });
-
-      if (result?.error) {
-        setError("Invalid email or password. Please try again.");
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Registration failed. Please try again.");
         setIsLoading(false);
-      } else {
-        router.push(callbackUrl);
-        router.refresh();
+        return;
       }
+      router.push("/login?registered=1&callbackUrl=/products");
     } catch {
       setError("An error occurred. Please try again.");
       setIsLoading(false);
@@ -54,7 +59,7 @@ export default function LoginPage() {
         <Link href="/">
           <Image
             src="/logo.png"
-            alt="C'FLAME Fire Protection Product Trading Logo"
+            alt="C'FLAME Fire Protection Product Trading"
             width={250}
             height={60}
             priority
@@ -63,20 +68,25 @@ export default function LoginPage() {
         </Link>
         <Card className="w-full shadow-lg">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-xl sm:text-2xl">Welcome back!</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">Create an account</CardTitle>
             <CardDescription className="text-sm">
-              {callbackUrl === "/products"
-                ? "Sign in to place your product order"
-                : "Sign in to the internal management platform"}
+              Register to place product orders online
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-            {registered && (
-              <div className="mb-4 rounded-md bg-green-50 border border-green-200 dark:bg-green-950/30 dark:border-green-900 p-3 text-sm text-green-700 dark:text-green-400">
-                Account created successfully! Please sign in.
-              </div>
-            )}
             <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+              <div className="grid gap-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Juan Dela Cruz"
+                  required
+                  autoComplete="name"
+                  className="min-h-11 touch-manipulation sm:min-h-0"
+                />
+              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -96,9 +106,20 @@ export default function LoginPage() {
                   name="password"
                   type="password"
                   required
-                  autoComplete="current-password"
+                  autoComplete="new-password"
+                  placeholder="At least 8 characters"
                   className="min-h-11 touch-manipulation sm:min-h-0"
-                  disabled={isLoading}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="confirm">Confirm Password</Label>
+                <Input
+                  id="confirm"
+                  name="confirm"
+                  type="password"
+                  required
+                  autoComplete="new-password"
+                  className="min-h-11 touch-manipulation sm:min-h-0"
                 />
               </div>
               {error && (
@@ -111,19 +132,14 @@ export default function LoginPage() {
                 className="w-full min-h-11 touch-manipulation sm:min-h-0"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading ? "Creating account..." : "Create account"}
               </Button>
-              {callbackUrl === "/products" && (
-                <p className="text-center text-sm text-muted-foreground">
-                  Don&apos;t have an account?{" "}
-                  <Link
-                    href="/register"
-                    className="text-primary underline-offset-4 hover:underline"
-                  >
-                    Register
-                  </Link>
-                </p>
-              )}
+              <p className="text-center text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link href="/login?callbackUrl=/products" className="text-primary underline-offset-4 hover:underline">
+                  Sign in
+                </Link>
+              </p>
             </form>
           </CardContent>
         </Card>

@@ -44,6 +44,7 @@ export const ROLES = {
   DELIVERY_STAFF: "delivery_staff",
   POS_CASHIER: "pos_cashier",
   VIEWER: "viewer",
+  CUSTOMER: "customer",
 } as const;
 
 export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
@@ -89,6 +90,8 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     PERMISSIONS.ATTENDANCE_WRITE,
     PERMISSIONS.REPORTS_READ, // Viewers can view reports
   ],
+  // Customers register via /register; they access /products only — no dashboard permissions.
+  [ROLES.CUSTOMER]: [],
 };
 
 export type SessionUser = {
