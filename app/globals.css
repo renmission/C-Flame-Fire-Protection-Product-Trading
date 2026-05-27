@@ -2,56 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Modern palette: Blue (primary), Red (secondary), Yellow (accent)
-   Hex ref: #2563EB, #DC2626, #EAB308 */
+/* C'FLAME brand palette: #2b2d42 (charcoal) | #8d99ae (slate) | #edf2f4 (off-white) | #ef233c (red/primary) | #d90429 (deep red) */
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 234 21% 21%;          /* #2b2d42 */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    /* Blue #2563EB - primary brand */
-    --primary: 221 83% 53%;
+    --card-foreground: 234 21% 21%;     /* #2b2d42 */
+    --primary: 353 86% 54%;             /* #ef233c */
     --primary-foreground: 0 0% 100%;
-    /* Red tint #FEF2F2 - secondary surfaces */
-    --secondary: 0 86% 97%;
-    --secondary-foreground: 0 63% 31%;
-    --muted: 48 33% 97%;
-    --muted-foreground: 222 13% 46%;
-    /* Yellow tint #FEFCE8 - accent surfaces */
-    --accent: 54 91% 95%;
-    --accent-foreground: 48 96% 25%;
-    /* Red #DC2626 - destructive */
-    --destructive: 0 73% 50%;
+    --secondary: 218 17% 94%;           /* light slate surface */
+    --secondary-foreground: 234 21% 21%;
+    --muted: 197 24% 94%;               /* #edf2f4 */
+    --muted-foreground: 218 17% 45%;    /* darker slate */
+    --accent: 218 17% 92%;              /* light slate for hover/active */
+    --accent-foreground: 234 21% 21%;   /* #2b2d42 */
+    --destructive: 350 96% 43%;         /* #d90429 */
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --border: 218 17% 85%;
+    --input: 218 17% 85%;
+    --ring: 353 86% 54%;                /* #ef233c */
     --radius: 0.5rem;
-    --sidebar: 221 40% 97%;
+    --sidebar: 197 24% 94%;             /* #edf2f4 */
   }
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 8%;
-    --card-foreground: 210 40% 98%;
-    /* Blue #60A5FA - primary in dark */
-    --primary: 213 94% 68%;
-    --primary-foreground: 222 47% 11%;
-    /* Red tint - secondary in dark */
-    --secondary: 0 32% 18%;
-    --secondary-foreground: 0 86% 90%;
-    --muted: 48 15% 18%;
-    --muted-foreground: 215 20% 65%;
-    /* Yellow tint - accent in dark */
-    --accent: 48 40% 22%;
-    --accent-foreground: 48 96% 70%;
-    --destructive: 0 63% 41%;
+    --background: 234 21% 11%;
+    --foreground: 197 24% 94%;          /* #edf2f4 */
+    --card: 234 21% 14%;
+    --card-foreground: 197 24% 94%;     /* #edf2f4 */
+    --primary: 353 86% 58%;             /* slightly lighter red for dark bg */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 218 17% 22%;
+    --secondary-foreground: 197 24% 90%;
+    --muted: 234 21% 17%;
+    --muted-foreground: 218 17% 62%;    /* #8d99ae */
+    --accent: 234 21% 22%;
+    --accent-foreground: 197 24% 94%;   /* #edf2f4 */
+    --destructive: 350 96% 43%;         /* #d90429 */
     --destructive-foreground: 0 0% 100%;
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
-    --ring: 213 94% 68%;
-    --sidebar: 222 47% 5%;
+    --border: 234 21% 25%;
+    --input: 234 21% 25%;
+    --ring: 353 86% 54%;
+    --sidebar: 234 21% 8%;
   }
 }
 

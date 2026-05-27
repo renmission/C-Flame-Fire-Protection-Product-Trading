@@ -8,7 +8,7 @@ import { Truck, Package, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82CA9D"];
+const COLORS = ["#ef233c", "#2b2d42", "#8d99ae", "#d90429", "#a8b4c2", "#c4cdd6"];
 
 const STATUS_LABELS: Record<string, string> = {
   created: "Created",
@@ -112,7 +112,7 @@ export function DeliveryDashboard() {
                   labelLine={false}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill="#ef233c"
                   dataKey="value"
                 >
                   {statusData.map((entry: { name: string; value: number }, index: number) => (
