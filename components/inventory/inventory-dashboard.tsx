@@ -904,6 +904,8 @@ function ProductFormDialog({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(product?.imageUrl ?? null);
   const [imageUploading, setImageUploading] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
   const categoryOptions: string[] = [
     ...new Set([...categories, product?.category].filter((x): x is string => Boolean(x))),
   ];
@@ -913,14 +915,18 @@ function ProductFormDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let resolvedImageUrl = product?.imageUrl ?? null;
+    let resolvedImageUrl = imageRemoved ? null : (product?.imageUrl ?? null);
     if (imageFile) {
       setImageUploading(true);
+      setImageError(null);
       try {
         resolvedImageUrl = await uploadProductImage(imageFile);
-      } finally {
+      } catch (err) {
+        setImageError(err instanceof Error ? err.message : "Upload failed");
         setImageUploading(false);
+        return;
       }
+      setImageUploading(false);
     }
     onSubmit({
       name: name.trim(),
@@ -956,11 +962,26 @@ function ProductFormDialog({
             <div>
               <Label>Image</Label>
               {imagePreview && (
-                <img
-                  src={imagePreview}
-                  alt="preview"
-                  className="mb-2 h-20 w-20 rounded object-cover"
-                />
+                <div className="relative mb-2 inline-block">
+                  <img
+                    src={imagePreview}
+                    alt="preview"
+                    className="h-20 w-20 rounded object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview(null);
+                      setImageRemoved(true);
+                      setImageError(null);
+                    }}
+                    className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs leading-none"
+                    aria-label="Remove image"
+                  >
+                    ×
+                  </button>
+                </div>
               )}
               <Input
                 type="file"
@@ -971,8 +992,13 @@ function ProductFormDialog({
                   if (!file) return;
                   setImageFile(file);
                   setImagePreview(URL.createObjectURL(file));
+                  setImageRemoved(false);
+                  setImageError(null);
                 }}
               />
+              {imageError && (
+                <p className="mt-1 text-sm text-destructive">{imageError}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="name">Name</Label>
