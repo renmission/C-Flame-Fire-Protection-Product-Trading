@@ -272,10 +272,10 @@ export function DashboardShell({
             <Image
               src="/logo.png"
               alt="C'FLAME Fire Protection Product Trading"
-              width={150}
-              height={40}
+              width={200}
+              height={56}
               priority
-              className="h-8 w-auto"
+              className="h-11 w-auto"
             />
             <span className="hidden font-semibold text-foreground md:inline-block">
               C&apos;Flame Fire Protection Product Trading
