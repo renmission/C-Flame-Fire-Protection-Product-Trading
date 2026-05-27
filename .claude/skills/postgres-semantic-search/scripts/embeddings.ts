@@ -16,7 +16,7 @@ export type EmbeddingModel =
 
 export async function getEmbedding(
   text: string,
-  model: EmbeddingModel = "text-embedding-3-small",
+  model: EmbeddingModel = "text-embedding-3-small"
 ): Promise<number[]> {
   const response = await openai.embeddings.create({
     model,
@@ -27,7 +27,7 @@ export async function getEmbedding(
 
 export async function getEmbeddings(
   texts: string[],
-  model: EmbeddingModel = "text-embedding-3-small",
+  model: EmbeddingModel = "text-embedding-3-small"
 ): Promise<number[][]> {
   // OpenAI supports batch of up to 2048 inputs
   const response = await openai.embeddings.create({
@@ -43,7 +43,7 @@ export async function getEmbeddings(
 
 export async function getEmbeddingReduced(
   text: string,
-  dimensions: number = 1536,
+  dimensions: number = 1536
 ): Promise<number[]> {
   const response = await openai.embeddings.create({
     model: "text-embedding-3-large",
@@ -84,7 +84,7 @@ export async function searchDocuments(
     threshold?: number;
     limit?: number;
     filter?: Record<string, unknown>;
-  } = {},
+  } = {}
 ) {
   const { threshold = 0.7, limit = 10, filter } = options;
 
@@ -118,7 +118,7 @@ export async function hybridSearch(
     limit?: number;
     rrfK?: number;
     language?: string;
-  } = {},
+  } = {}
 ) {
   const { limit = 10, rrfK = 60, language = "simple" } = options;
 
@@ -150,7 +150,7 @@ export async function drizzleSemanticSearch<T extends PgDatabase<any>>(
     table?: string;
     threshold?: number;
     limit?: number;
-  } = {},
+  } = {}
 ) {
   const { table = "documents", threshold = 0.7, limit = 10 } = options;
 

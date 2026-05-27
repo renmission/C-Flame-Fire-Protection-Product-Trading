@@ -14,12 +14,7 @@ export async function GET(req: NextRequest) {
 
   const conditions = [eq(products.archived, 0)];
   if (search) {
-    conditions.push(
-      or(
-        ilike(products.name, `%${search}%`),
-        ilike(products.sku, `%${search}%`)
-      )!
-    );
+    conditions.push(or(ilike(products.name, `%${search}%`), ilike(products.sku, `%${search}%`))!);
   }
 
   const rows = await db

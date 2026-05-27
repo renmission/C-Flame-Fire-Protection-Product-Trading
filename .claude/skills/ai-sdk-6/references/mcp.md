@@ -172,7 +172,7 @@ mcpClient.onElicitationRequest(ElicitationRequestSchema, async (request) => {
   try {
     const userInput = await getInputFromUser(
       request.params.message,
-      request.params.requestedSchema,
+      request.params.requestedSchema
     );
     return {
       action: "accept",

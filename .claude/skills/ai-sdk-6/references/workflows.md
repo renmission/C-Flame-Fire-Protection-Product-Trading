@@ -79,10 +79,7 @@ async function handleCustomerQuery(query: string) {
 
   // Route based on classification
   const { text: response } = await generateText({
-    model:
-      classification.complexity === "simple"
-        ? openai("gpt-5.4-mini")
-        : openai("o3-mini"),
+    model: classification.complexity === "simple" ? openai("gpt-5.4-mini") : openai("o3-mini"),
     system: {
       general: "You handle general inquiries.",
       refund: "You specialize in refund requests.",
@@ -175,7 +172,7 @@ async function implementFeature(request: string) {
             purpose: z.string(),
             filePath: z.string(),
             changeType: z.enum(["create", "modify", "delete"]),
-          }),
+          })
         ),
       }),
     }),
@@ -203,7 +200,7 @@ async function implementFeature(request: string) {
       });
 
       return { file, implementation: change };
-    }),
+    })
   );
 
   return { plan, changes };

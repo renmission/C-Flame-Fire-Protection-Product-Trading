@@ -28,11 +28,7 @@ import {
   ConversationEmptyState,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import {
   Input,
   PromptInputTextarea,
@@ -90,10 +86,7 @@ const ConversationDemo = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <Input
-          onSubmit={handleSubmit}
-          className="mt-4 w-full max-w-2xl mx-auto relative"
-        >
+        <Input onSubmit={handleSubmit} className="mt-4 w-full max-w-2xl mx-auto relative">
           <PromptInputTextarea
             value={input}
             placeholder="Say something..."
@@ -213,8 +206,5 @@ import { messagesToMarkdown } from "@/components/ai-elements/conversation";
 const markdown = messagesToMarkdown(messages);
 
 // With custom formatter
-const customMarkdown = messagesToMarkdown(
-  messages,
-  (msg, i) => `[${msg.role}]: ${msg.content}`,
-);
+const customMarkdown = messagesToMarkdown(messages, (msg, i) => `[${msg.role}]: ${msg.content}`);
 ```

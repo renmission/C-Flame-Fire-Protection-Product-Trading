@@ -56,11 +56,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
@@ -115,7 +111,7 @@ const InputDemo = () => {
           model: model,
           webSearch: useWebSearch,
         },
-      },
+      }
     );
     setText("");
   };
@@ -132,9 +128,7 @@ const InputDemo = () => {
                     switch (part.type) {
                       case "text":
                         return (
-                          <MessageResponse key={`${message.id}-${i}`}>
-                            {part.text}
-                          </MessageResponse>
+                          <MessageResponse key={`${message.id}-${i}`}>{part.text}</MessageResponse>
                         );
                       default:
                         return null;
@@ -147,20 +141,12 @@ const InputDemo = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput
-          onSubmit={handleSubmit}
-          className="mt-4"
-          globalDrop
-          multiple
-        >
+        <PromptInput onSubmit={handleSubmit} className="mt-4" globalDrop multiple>
           <PromptInputHeader>
             <PromptInputAttachmentsDisplay />
           </PromptInputHeader>
           <PromptInputBody>
-            <PromptInputTextarea
-              onChange={(e) => setText(e.target.value)}
-              value={text}
-            />
+            <PromptInputTextarea onChange={(e) => setText(e.target.value)} value={text} />
           </PromptInputBody>
           <PromptInputFooter>
             <PromptInputTools>

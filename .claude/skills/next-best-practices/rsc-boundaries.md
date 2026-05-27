@@ -141,11 +141,7 @@ export default function Page() {
 
 // ClientForm.tsx (client)
 ("use client");
-export function ClientForm({
-  onSubmit,
-}: {
-  onSubmit: (data: FormData) => Promise<void>;
-}) {
+export function ClientForm({ onSubmit }: { onSubmit: (data: FormData) => Promise<void> }) {
   return <form action={onSubmit}>...</form>;
 }
 ```

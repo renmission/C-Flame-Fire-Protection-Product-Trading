@@ -142,11 +142,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import {
   PromptInput,
   PromptInputBody,
@@ -197,10 +193,7 @@ export default function ChatPage() {
 
       <PromptInput onSubmit={handleSubmit} className="mt-4">
         <PromptInputBody>
-          <PromptInputTextarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
+          <PromptInputTextarea value={input} onChange={(e) => setInput(e.target.value)} />
         </PromptInputBody>
         <PromptInputFooter>
           <div />

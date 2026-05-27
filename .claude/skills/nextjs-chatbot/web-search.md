@@ -26,8 +26,7 @@ const cache = new Map<string, { data: unknown; ts: number }>();
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 export const searchWebsiteTool = tool({
-  description:
-    "Search the project website for events, news, and announcements.",
+  description: "Search the project website for events, news, and announcements.",
   inputSchema: z.object({
     query: z.string().describe("Search query"),
   }),
@@ -36,12 +35,9 @@ export const searchWebsiteTool = tool({
     const cached = cache.get(cacheKey);
     if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data;
 
-    const res = await fetch(
-      `${API_BASE}/search?q=${encodeURIComponent(query)}&limit=5`,
-      {
-        signal: AbortSignal.timeout(8000),
-      },
-    );
+    const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}&limit=5`, {
+      signal: AbortSignal.timeout(8000),
+    });
     if (!res.ok) return { results: [], total: 0 };
 
     const results = await res.json();

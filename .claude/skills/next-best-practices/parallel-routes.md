@@ -63,11 +63,7 @@ The `(.)` prefix intercepts routes at the same level.
 // app/@modal/(.)photos/[id]/page.tsx
 import { Modal } from "@/components/modal";
 
-export default async function PhotoModal({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function PhotoModal({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const photo = await getPhoto(id);
 
@@ -83,11 +79,7 @@ export default async function PhotoModal({
 
 ```tsx
 // app/photos/[id]/page.tsx
-export default async function PhotoPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function PhotoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const photo = await getPhoto(id);
 
@@ -133,7 +125,7 @@ export function Modal({ children }: { children: React.ReactNode }) {
         router.back(); // Correct
       }
     },
-    [router],
+    [router]
   );
 
   return (
@@ -246,11 +238,7 @@ In Next.js 15+, `params` is a Promise:
 
 ```tsx
 // Correct
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 }
 ```

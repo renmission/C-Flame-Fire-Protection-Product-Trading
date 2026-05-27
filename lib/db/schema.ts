@@ -458,6 +458,66 @@ export const deliveryStatusUpdates = pgTable(
   })
 );
 
+// --- Orders ---
+
+export const orderStatuses = [
+  "pending",
+  "confirmed",
+  "processing",
+  "ready",
+  "delivered",
+  "cancelled",
+] as const;
+export type OrderStatus = (typeof orderStatuses)[number];
+
+/** Customer order. Separate from POS — for pre-orders and bulk orders. */
+export const orders = pgTable(
+  "order",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    orderNumber: text("order_number").notNull().unique(),
+    customerId: text("customer_id")
+      .notNull()
+      .references(() => customers.id, { onDelete: "restrict" }),
+    status: text("status").$type<OrderStatus>().notNull().default("pending"),
+    notes: text("notes"),
+    createdById: text("created_by_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => ({
+    orderNumberIdx: index("order_order_number_idx").on(table.orderNumber),
+    customerIdIdx: index("order_customer_id_idx").on(table.customerId),
+    statusIdx: index("order_status_idx").on(table.status),
+    createdAtIdx: index("order_created_at_idx").on(table.createdAt),
+  })
+);
+
+export const orderItems = pgTable(
+  "order_item",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    productId: text("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "restrict" }),
+    quantity: integer("quantity").notNull(),
+    unitPrice: decimal("unit_price", { precision: 12, scale: 2 }).notNull(),
+    subtotal: decimal("subtotal", { precision: 12, scale: 2 }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => ({
+    orderIdIdx: index("order_item_order_id_idx").on(table.orderId),
+    productIdIdx: index("order_item_product_id_idx").on(table.productId),
+  })
+);
+
 // --- Notifications ---
 
 export const notificationTypes = ["low_stock", "delivery_status", "attendance_deadline"] as const;

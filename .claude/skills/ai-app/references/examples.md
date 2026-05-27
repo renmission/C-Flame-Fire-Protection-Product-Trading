@@ -36,15 +36,8 @@ export async function POST(req: Request) {
 "use client";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import {
-  Conversation,
-  ConversationContent,
-} from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import {
   PromptInput,
   PromptInputBody,
@@ -173,17 +166,8 @@ import {
   PromptInputAttachments,
   type PromptInputMessage,
 } from "@/components/ai-elements/prompt-input";
-import {
-  Reasoning,
-  ReasoningTrigger,
-  ReasoningContent,
-} from "@/components/ai-elements/reasoning";
-import {
-  Sources,
-  SourcesTrigger,
-  SourcesContent,
-  Source,
-} from "@/components/ai-elements/sources";
+import { Reasoning, ReasoningTrigger, ReasoningContent } from "@/components/ai-elements/reasoning";
+import { Sources, SourcesTrigger, SourcesContent, Source } from "@/components/ai-elements/sources";
 import { Loader } from "@/components/ai-elements/loader";
 import { useState } from "react";
 
@@ -233,9 +217,7 @@ export default function ChatPage() {
                     return (
                       <Reasoning
                         key={i}
-                        isStreaming={
-                          status === "streaming" && isLastMessage(message.id)
-                        }
+                        isStreaming={status === "streaming" && isLastMessage(message.id)}
                       >
                         <ReasoningTrigger />
                         <ReasoningContent>{part.text}</ReasoningContent>
@@ -252,9 +234,7 @@ export default function ChatPage() {
 
               {/* Collect and display sources */}
               {(() => {
-                const sourceUrls = message.parts.filter(
-                  (p) => p.type === "source-url",
-                );
+                const sourceUrls = message.parts.filter((p) => p.type === "source-url");
                 if (sourceUrls.length === 0) return null;
                 return (
                   <Sources>
@@ -393,11 +373,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import {
   PromptInput,
   PromptInputBody,
@@ -449,16 +425,10 @@ export default function AgentPage() {
                   case "tool-result":
                     return (
                       <Tool key={i}>
-                        <ToolHeader
-                          title={part.toolName}
-                          type={part.type}
-                          state={part.state}
-                        />
+                        <ToolHeader title={part.toolName} type={part.type} state={part.state} />
                         <ToolContent>
                           <ToolInput input={part.input} />
-                          {part.state === "output-available" && (
-                            <ToolOutput output={part.output} />
-                          )}
+                          {part.state === "output-available" && <ToolOutput output={part.output} />}
                         </ToolContent>
                       </Tool>
                     );
@@ -621,9 +591,7 @@ export function AgentSelector({ value, onChange }: AgentSelectorProps) {
           onClick={() => onChange(type)}
           className={cn(
             "rounded-full px-3 py-1 text-sm transition-colors",
-            value === type
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted hover:bg-muted/80",
+            value === type ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"
           )}
         >
           {agentInfo[type].icon} {agentInfo[type].label}

@@ -2,10 +2,7 @@
 
 import type { ToolUIPart } from "ai";
 
-import {
-  CodeBlock,
-  CodeBlockCopyButton,
-} from "@/components/ai-elements/code-block";
+import { CodeBlock, CodeBlockCopyButton } from "@/components/ai-elements/code-block";
 import {
   Sandbox,
   SandboxContent,
@@ -76,21 +73,19 @@ interface StateButtonProps {
   onStateChange: (state: ToolUIPart["state"]) => void;
 }
 
-const StateButton = memo(
-  ({ s, currentState, onStateChange }: StateButtonProps) => {
-    const handleClick = useCallback(() => onStateChange(s), [onStateChange, s]);
-    return (
-      <Button
-        key={s}
-        onClick={handleClick}
-        size="sm"
-        variant={currentState === s ? "default" : "outline"}
-      >
-        {s}
-      </Button>
-    );
-  },
-);
+const StateButton = memo(({ s, currentState, onStateChange }: StateButtonProps) => {
+  const handleClick = useCallback(() => onStateChange(s), [onStateChange, s]);
+  return (
+    <Button
+      key={s}
+      onClick={handleClick}
+      size="sm"
+      variant={currentState === s ? "default" : "outline"}
+    >
+      {s}
+    </Button>
+  );
+});
 
 StateButton.displayName = "StateButton";
 
@@ -105,12 +100,7 @@ const Example = () => {
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
         {states.map((s) => (
-          <StateButton
-            currentState={state}
-            key={s}
-            onStateChange={handleStateChange}
-            s={s}
-          />
+          <StateButton currentState={state} key={s} onStateChange={handleStateChange} s={s} />
         ))}
       </div>
 
@@ -127,9 +117,7 @@ const Example = () => {
             <SandboxTabContent value="code">
               <CodeBlock
                 className="border-0"
-                code={
-                  state === "input-streaming" ? "# Generating code..." : code
-                }
+                code={state === "input-streaming" ? "# Generating code..." : code}
                 language="python"
               >
                 <CodeBlockCopyButton
@@ -160,11 +148,7 @@ const Example = () => {
                   </StackTraceContent>
                 </StackTrace>
               ) : (
-                <CodeBlock
-                  className="border-0"
-                  code={outputs[state] ?? ""}
-                  language="log"
-                >
+                <CodeBlock className="border-0" code={outputs[state] ?? ""} language="log">
                   <CodeBlockCopyButton
                     className="absolute top-2 right-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
                     size="sm"

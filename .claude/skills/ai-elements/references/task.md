@@ -70,10 +70,7 @@ const TaskDemo = () => {
           <span className="inline-flex items-center gap-1" key={index}>
             {item.text}
             <TaskItemFile>
-              <IconComponent
-                color={item.file.color || iconInfo.color}
-                className="size-4"
-              />
+              <IconComponent color={item.file.color || iconInfo.color} className="size-4" />
               <span>{item.file.name}</span>
             </TaskItemFile>
           </span>
@@ -97,18 +94,14 @@ const TaskDemo = () => {
         </div>
 
         <div className="flex-1 overflow-auto space-y-4">
-          {isLoading && !object && (
-            <div className="text-muted-foreground">Generating tasks...</div>
-          )}
+          {isLoading && !object && <div className="text-muted-foreground">Generating tasks...</div>}
 
           {object?.tasks?.map((task: any, taskIndex: number) => (
             <Task key={taskIndex} defaultOpen={taskIndex === 0}>
               <TaskTrigger title={task.title || "Loading..."} />
               <TaskContent>
                 {task.items?.map((item: any, itemIndex: number) => (
-                  <TaskItem key={itemIndex}>
-                    {renderTaskItem(item, itemIndex)}
-                  </TaskItem>
+                  <TaskItem key={itemIndex}>{renderTaskItem(item, itemIndex)}</TaskItem>
                 ))}
               </TaskContent>
             </Task>

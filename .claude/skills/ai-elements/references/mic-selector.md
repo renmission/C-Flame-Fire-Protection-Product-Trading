@@ -119,8 +119,7 @@ A custom hook for managing audio input devices. This hook is used internally by 
 import { useAudioDevices } from "@repo/elements/mic-selector";
 
 export default function Example() {
-  const { devices, loading, error, hasPermission, loadDevices } =
-    useAudioDevices();
+  const { devices, loading, error, hasPermission, loadDevices } = useAudioDevices();
 
   return (
     <div>
@@ -129,9 +128,7 @@ export default function Example() {
       {devices.map((device) => (
         <div key={device.deviceId}>{device.label}</div>
       ))}
-      {!hasPermission && (
-        <button onClick={loadDevices}>Grant Permission</button>
-      )}
+      {!hasPermission && <button onClick={loadDevices}>Grant Permission</button>}
     </div>
   );
 }

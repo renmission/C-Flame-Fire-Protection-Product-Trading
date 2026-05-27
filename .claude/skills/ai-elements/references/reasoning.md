@@ -23,11 +23,7 @@ Add the following component to your frontend:
 ```tsx title="app/page.tsx"
 "use client";
 
-import {
-  Reasoning,
-  ReasoningContent,
-  ReasoningTrigger,
-} from "@/components/ai-elements/reasoning";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ai-elements/reasoning";
 import {
   Conversation,
   ConversationContent,
@@ -39,11 +35,7 @@ import {
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
@@ -58,16 +50,13 @@ const MessageParts = ({
   isStreaming: boolean;
 }) => {
   // Consolidate all reasoning parts into one block
-  const reasoningParts = message.parts.filter(
-    (part) => part.type === "reasoning",
-  );
+  const reasoningParts = message.parts.filter((part) => part.type === "reasoning");
   const reasoningText = reasoningParts.map((part) => part.text).join("\n\n");
   const hasReasoning = reasoningParts.length > 0;
 
   // Check if reasoning is still streaming (last part is reasoning on last message)
   const lastPart = message.parts.at(-1);
-  const isReasoningStreaming =
-    isLastMessage && isStreaming && lastPart?.type === "reasoning";
+  const isReasoningStreaming = isLastMessage && isStreaming && lastPart?.type === "reasoning";
 
   return (
     <>
@@ -79,11 +68,7 @@ const MessageParts = ({
       )}
       {message.parts.map((part, i) => {
         if (part.type === "text") {
-          return (
-            <MessageResponse key={`${message.id}-${i}`}>
-              {part.text}
-            </MessageResponse>
-          );
+          return <MessageResponse key={`${message.id}-${i}`}>{part.text}</MessageResponse>;
         }
         return null;
       })}
@@ -125,10 +110,7 @@ const ReasoningDemo = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput
-          onSubmit={handleSubmit}
-          className="mt-4 w-full max-w-2xl mx-auto relative"
-        >
+        <PromptInput onSubmit={handleSubmit} className="mt-4 w-full max-w-2xl mx-auto relative">
           <PromptInputTextarea
             value={input}
             placeholder="Say something..."
@@ -158,8 +140,7 @@ import { streamText, UIMessage, convertToModelMessages } from "ai";
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { model, messages }: { messages: UIMessage[]; model: string } =
-    await req.json();
+  const { model, messages }: { messages: UIMessage[]; model: string } = await req.json();
 
   const result = streamText({
     model: "deepseek/deepseek-r1",

@@ -220,11 +220,7 @@ For simple single-page apps:
 
 ```tsx
 // app/layout.tsx - minimal, just providers
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>{children}</body>

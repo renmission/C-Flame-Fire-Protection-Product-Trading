@@ -496,10 +496,7 @@ import { revalidateTag } from "next/cache";
 ### Signature
 
 ```tsx
-function revalidateTag(
-  tag: string,
-  profile: string | { expire?: number },
-): void;
+function revalidateTag(tag: string, profile: string | { expire?: number }): void;
 ```
 
 ### Parameters
@@ -1117,11 +1114,7 @@ export async function generateStaticParams() {
   return posts.map((post) => ({ slug: post.slug }));
 }
 
-export default async function BlogPost({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPost(slug);
   return <Article post={post} />;
@@ -1150,11 +1143,7 @@ export async function getPost(slug: string) {
 }
 
 // app/blog/[slug]/page.tsx
-export default async function BlogPost({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPost(slug);
   return <Article post={post} />;
@@ -1214,10 +1203,7 @@ async function getCategories() {
 }
 
 export default async function ProductsPage() {
-  const [products, categories] = await Promise.all([
-    getProducts(),
-    getCategories(),
-  ]);
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
   return <ProductGrid products={products} categories={categories} />;
 }
 ```
@@ -1265,11 +1251,7 @@ Cache is bypassed (not read from) when:
 // app/products/[id]/page.tsx
 
 // Metadata is cached independently from the page
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const product = await getProduct(id); // May use its own 'use cache'
   return { title: product.name, description: product.summary };
@@ -1281,11 +1263,7 @@ export async function generateViewport() {
 }
 
 // Page cache is separate from metadata cache
-export default async function ProductPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   return <ProductDetails productId={id} />;
 }

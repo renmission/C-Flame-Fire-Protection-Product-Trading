@@ -67,7 +67,7 @@ const Example = () => {
 
   const latestMessage = messages[messages.length - 1];
   const weatherTool = latestMessage?.parts?.find(
-    (part) => part.type === "tool-fetch_weather_data",
+    (part) => part.type === "tool-fetch_weather_data"
   ) as WeatherToolUIPart | undefined;
 
   return (
@@ -80,17 +80,12 @@ const Example = () => {
 
           {weatherTool && (
             <Tool defaultOpen={true}>
-              <ToolHeader
-                type="tool-fetch_weather_data"
-                state={weatherTool.state}
-              />
+              <ToolHeader type="tool-fetch_weather_data" state={weatherTool.state} />
               <ToolContent>
                 <ToolInput input={weatherTool.input} />
                 <ToolOutput
                   output={
-                    <MessageResponse>
-                      {formatWeatherResult(weatherTool.output)}
-                    </MessageResponse>
+                    <MessageResponse>{formatWeatherResult(weatherTool.output)}</MessageResponse>
                   }
                   errorText={weatherTool.errorText}
                 />
@@ -136,13 +131,8 @@ export async function POST(req: Request) {
       fetch_weather_data: {
         description: "Fetch weather information for a specific location",
         parameters: z.object({
-          location: z
-            .string()
-            .describe("The city or location to get weather for"),
-          units: z
-            .enum(["celsius", "fahrenheit"])
-            .default("celsius")
-            .describe("Temperature units"),
+          location: z.string().describe("The city or location to get weather for"),
+          units: z.enum(["celsius", "fahrenheit"]).default("celsius").describe("Temperature units"),
         }),
         inputSchema: z.object({
           location: z.string(),

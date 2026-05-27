@@ -7,10 +7,7 @@ Supporting components for AI applications.
 Syntax highlighted code with copy button.
 
 ```tsx
-import {
-  CodeBlock,
-  CodeBlockCopyButton,
-} from "@/components/ai-elements/code-block";
+import { CodeBlock, CodeBlockCopyButton } from "@/components/ai-elements/code-block";
 
 <CodeBlock
   code={`const greeting = "Hello, World!";
@@ -163,10 +160,7 @@ import {
   ConfirmationAction,
 } from "@/components/ai-elements/confirmation";
 
-<Confirmation
-  approval={{ id: "tool-1", approved: undefined }}
-  state="approval-requested"
->
+<Confirmation approval={{ id: "tool-1", approved: undefined }} state="approval-requested">
   <ConfirmationTitle>
     The AI wants to run <code>deleteFile()</code>
   </ConfirmationTitle>
@@ -176,15 +170,10 @@ import {
       This will permanently delete the file. Continue?
     </p>
     <ConfirmationActions>
-      <ConfirmationAction
-        variant="outline"
-        onClick={() => handleResponse(false, "User declined")}
-      >
+      <ConfirmationAction variant="outline" onClick={() => handleResponse(false, "User declined")}>
         Deny
       </ConfirmationAction>
-      <ConfirmationAction onClick={() => handleResponse(true)}>
-        Allow
-      </ConfirmationAction>
+      <ConfirmationAction onClick={() => handleResponse(true)}>Allow</ConfirmationAction>
     </ConfirmationActions>
   </ConfirmationRequest>
 
@@ -240,11 +229,7 @@ import {
         icon={CopyIcon}
         onClick={() => navigator.clipboard.writeText(code)}
       />
-      <ArtifactAction
-        tooltip="Download"
-        icon={DownloadIcon}
-        onClick={handleDownload}
-      />
+      <ArtifactAction tooltip="Download" icon={DownloadIcon} onClick={handleDownload} />
       <ArtifactClose onClick={onClose} />
     </ArtifactActions>
   </ArtifactHeader>
@@ -274,12 +259,7 @@ AI-generated image display.
 ```tsx
 import { Image } from "@/components/ai-elements/image";
 
-<Image
-  src={generatedImageUrl}
-  alt="AI generated artwork"
-  width={512}
-  height={512}
-/>;
+<Image src={generatedImageUrl} alt="AI generated artwork" width={512} height={512} />;
 ```
 
 ## ModelSelector
@@ -400,10 +380,7 @@ import {
 
 const [logs, setLogs] = useState([]);
 
-<WebPreview
-  defaultUrl="http://localhost:3000"
-  onUrlChange={(url) => console.log(url)}
->
+<WebPreview defaultUrl="http://localhost:3000" onUrlChange={(url) => console.log(url)}>
   <WebPreviewNavigation>
     <WebPreviewNavigationButton tooltip="Back" onClick={() => {}}>
       <ArrowLeftIcon className="size-4" />

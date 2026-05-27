@@ -60,9 +60,9 @@ const Example = () => {
   };
 
   const latestMessage = messages[messages.length - 1];
-  const deleteTool = latestMessage?.parts?.find(
-    (part) => part.type === "tool-delete_file",
-  ) as DeleteFileToolUIPart | undefined;
+  const deleteTool = latestMessage?.parts?.find((part) => part.type === "tool-delete_file") as
+    | DeleteFileToolUIPart
+    | undefined;
 
   return (
     <div className="max-w-4xl mx-auto p-6 relative size-full rounded-lg border h-[600px]">
@@ -74,8 +74,7 @@ const Example = () => {
         {deleteTool?.approval && (
           <Confirmation approval={deleteTool.approval} state={deleteTool.state}>
             <ConfirmationRequest>
-              This tool wants to delete:{" "}
-              <code>{deleteTool.input?.filePath}</code>
+              This tool wants to delete: <code>{deleteTool.input?.filePath}</code>
               <br />
               Do you approve this action?
             </ConfirmationRequest>

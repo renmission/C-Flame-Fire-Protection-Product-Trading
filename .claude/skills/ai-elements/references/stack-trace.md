@@ -43,18 +43,12 @@ export default function Page() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       {messages.map((message) => {
-        const toolInvocations = message.parts?.filter(
-          (part) => part.type === "tool-invocation",
-        );
+        const toolInvocations = message.parts?.filter((part) => part.type === "tool-invocation");
 
         return toolInvocations?.map((tool) => {
           if (tool.toolName === "runCode" && tool.result?.error) {
             return (
-              <StackTrace
-                key={tool.toolCallId}
-                trace={tool.result.error}
-                defaultOpen
-              >
+              <StackTrace key={tool.toolCallId} trace={tool.result.error} defaultOpen>
                 <StackTraceHeader>
                   <StackTraceError>
                     <StackTraceErrorType />

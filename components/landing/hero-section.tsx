@@ -20,11 +20,25 @@ const stagger: Variants = {
 /* ─── SVG illustrations ──────────────────────────────────────── */
 function SmokeAlarmSVG() {
   return (
-    <svg viewBox="0 0 90 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-md">
+    <svg
+      viewBox="0 0 90 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-full h-full drop-shadow-md"
+    >
       <ellipse cx="45" cy="12" rx="45" ry="12" fill="#f1f5f9" />
       <ellipse cx="45" cy="12" rx="42" ry="10" stroke="#cbd5e1" strokeWidth="1" fill="none" />
       {[25, 35, 45, 55, 65].map((x) => (
-        <line key={x} x1={x} y1="7" x2={x} y2="17" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" />
+        <line
+          key={x}
+          x1={x}
+          y1="7"
+          x2={x}
+          y2="17"
+          stroke="#94a3b8"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
       ))}
       <circle cx="45" cy="12" r="5" fill="#ef233c" />
       <circle cx="45" cy="12" r="2.5" fill="#d90429" />
@@ -71,7 +85,8 @@ export function HeroSection() {
             className="text-sm md:text-base text-muted-foreground max-w-sm leading-relaxed mb-10"
             style={{ fontFamily: "var(--font-dm-sans)" }}
           >
-            We provide fire safety services &amp; equipment for homes and businesses across the region.
+            We provide fire safety services &amp; equipment for homes and businesses across the
+            region.
           </motion.p>
 
           {/* CTA row */}

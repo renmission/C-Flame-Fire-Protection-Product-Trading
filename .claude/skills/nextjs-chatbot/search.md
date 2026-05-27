@@ -87,20 +87,14 @@ Separate query construction from execution so benchmarks can test SQL without an
 // lib/ai/tools/search-services.ts
 
 // Returns the SQL string + params — testable without a DB connection
-export function buildSearchServicesQuery(params: {
-  query: string;
-  provider?: string;
-}) {
+export function buildSearchServicesQuery(params: { query: string; provider?: string }) {
   const { query, provider } = params;
   // ... build parameterized SQL
   return { sql, values };
 }
 
 // Actual DB execution
-export async function searchServices(params: {
-  query: string;
-  provider?: string;
-}) {
+export async function searchServices(params: { query: string; provider?: string }) {
   const { sql, values } = buildSearchServicesQuery(params);
   return db.execute(sql, values);
 }
@@ -129,9 +123,7 @@ export const searchServicesTool = tool({
     total: z.number(),
   }),
   execute: async ({ query, provider, category }) => {
-    const normalizedProvider = provider
-      ? normalizeProvider(provider)
-      : undefined;
+    const normalizedProvider = provider ? normalizeProvider(provider) : undefined;
     return searchServices({ query, provider: normalizedProvider, category });
   },
 });
@@ -167,11 +159,8 @@ export const embeddings = pgTable(
     embedding: vector("embedding", { dimensions: 1536 }).notNull(),
   },
   (t) => ({
-    embeddingIndex: index("embeddingIndex").using(
-      "hnsw",
-      t.embedding.op("vector_cosine_ops"),
-    ),
-  }),
+    embeddingIndex: index("embeddingIndex").using("hnsw", t.embedding.op("vector_cosine_ops")),
+  })
 );
 ```
 

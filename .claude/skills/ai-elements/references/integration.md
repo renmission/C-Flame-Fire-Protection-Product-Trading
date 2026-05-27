@@ -83,10 +83,7 @@ Switch on `part.type` to render appropriate components:
 
           case "reasoning":
             return (
-              <Reasoning
-                key={i}
-                isStreaming={status === "streaming" && isLastPart(message, i)}
-              >
+              <Reasoning key={i} isStreaming={status === "streaming" && isLastPart(message, i)}>
                 <ReasoningTrigger />
                 <ReasoningContent>{part.text}</ReasoningContent>
               </Reasoning>
@@ -100,17 +97,10 @@ Switch on `part.type` to render appropriate components:
             if (part.type.startsWith("tool-")) {
               return (
                 <Tool key={i}>
-                  <ToolHeader
-                    type={part.type}
-                    state={part.state}
-                    title={part.toolName}
-                  />
+                  <ToolHeader type={part.type} state={part.state} title={part.toolName} />
                   <ToolContent>
                     <ToolInput input={part.input} />
-                    <ToolOutput
-                      output={part.output}
-                      errorText={part.errorText}
-                    />
+                    <ToolOutput output={part.output} errorText={part.errorText} />
                   </ToolContent>
                 </Tool>
               );
@@ -207,7 +197,7 @@ sendMessage(
       model: "perplexity/sonar",
       webSearch: true,
     },
-  },
+  }
 );
 ```
 
@@ -243,9 +233,7 @@ const { error, status } = useChat();
 {
   status === "error" && (
     <Alert variant="destructive">
-      <AlertDescription>
-        {error?.message || "An error occurred"}
-      </AlertDescription>
+      <AlertDescription>{error?.message || "An error occurred"}</AlertDescription>
     </Alert>
   );
 }

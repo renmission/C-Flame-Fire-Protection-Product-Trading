@@ -67,7 +67,7 @@ interface SearchResult {
 async function searchWithRerank(
   query: string,
   embedding: number[],
-  topK: number = 10,
+  topK: number = 10
 ): Promise<SearchResult[]> {
   // Stage 1: Get candidates (3x final count)
   const candidates = await db.execute(sql`
@@ -168,7 +168,7 @@ interface RerankResult {
 async function rerankWithLocalService(
   query: string,
   documents: string[],
-  topN: number = 10,
+  topN: number = 10
 ): Promise<RerankResult[]> {
   const response = await fetch("http://localhost:8000/rerank", {
     method: "POST",
@@ -179,11 +179,7 @@ async function rerankWithLocalService(
 }
 
 // Usage with search results
-async function searchWithLocalRerank(
-  query: string,
-  embedding: number[],
-  topK: number = 10,
-) {
+async function searchWithLocalRerank(query: string, embedding: number[], topK: number = 10) {
   // Stage 1: Get candidates
   const candidates = await db.execute(sql`
     SELECT id, content FROM documents
@@ -195,7 +191,7 @@ async function searchWithLocalRerank(
   const reranked = await rerankWithLocalService(
     query,
     candidates.map((c) => c.content),
-    topK,
+    topK
   );
 
   // Map back to original results

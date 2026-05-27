@@ -30,7 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`antialiased ${oswald.variable} ${dmSans.variable}`} suppressHydrationWarning>
+      <body
+        className={`antialiased ${oswald.variable} ${dmSans.variable}`}
+        suppressHydrationWarning
+      >
         <Script
           id="theme-init"
           strategy="beforeInteractive"

@@ -33,15 +33,8 @@ export async function POST(req: Request) {
 "use client";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import {
-  Conversation,
-  ConversationContent,
-} from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import {
   PromptInput,
   PromptInputBody,
@@ -78,7 +71,7 @@ export default function ChatPage() {
                       <MessageResponse>{part.text}</MessageResponse>
                     </MessageContent>
                   </Message>
-                ) : null,
+                ) : null
               )}
             </div>
           ))}
@@ -88,10 +81,7 @@ export default function ChatPage() {
 
       <PromptInput onSubmit={handleSubmit} className="mt-4">
         <PromptInputBody>
-          <PromptInputTextarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
+          <PromptInputTextarea value={input} onChange={(e) => setInput(e.target.value)} />
         </PromptInputBody>
         <PromptInputFooter>
           <div />
@@ -180,17 +170,8 @@ import {
   PromptInputSelectItem,
   type PromptInputMessage,
 } from "@/components/ai-elements/prompt-input";
-import {
-  Reasoning,
-  ReasoningTrigger,
-  ReasoningContent,
-} from "@/components/ai-elements/reasoning";
-import {
-  Sources,
-  SourcesTrigger,
-  SourcesContent,
-  Source,
-} from "@/components/ai-elements/sources";
+import { Reasoning, ReasoningTrigger, ReasoningContent } from "@/components/ai-elements/reasoning";
+import { Sources, SourcesTrigger, SourcesContent, Source } from "@/components/ai-elements/sources";
 import { Loader } from "@/components/ai-elements/loader";
 import { CopyIcon, RefreshCcwIcon } from "lucide-react";
 import { useState } from "react";
@@ -211,7 +192,7 @@ export default function ChatPage() {
     if (!message.text.trim() && !message.files?.length) return;
     sendMessage(
       { text: message.text || "Sent with attachments", files: message.files },
-      { body: { model } },
+      { body: { model } }
     );
     setInput("");
   };
@@ -221,9 +202,7 @@ export default function ChatPage() {
       <Conversation className="flex-1">
         <ConversationContent>
           {messages.map((message) => {
-            const sourceUrls = message.parts.filter(
-              (p) => p.type === "source-url",
-            );
+            const sourceUrls = message.parts.filter((p) => p.type === "source-url");
 
             return (
               <div key={message.id}>
@@ -250,17 +229,12 @@ export default function ChatPage() {
                           </MessageContent>
                           {message.role === "assistant" && (
                             <MessageActions>
-                              <MessageAction
-                                label="Retry"
-                                onClick={() => regenerate()}
-                              >
+                              <MessageAction label="Retry" onClick={() => regenerate()}>
                                 <RefreshCcwIcon data-icon />
                               </MessageAction>
                               <MessageAction
                                 label="Copy"
-                                onClick={() =>
-                                  navigator.clipboard.writeText(part.text)
-                                }
+                                onClick={() => navigator.clipboard.writeText(part.text)}
                               >
                                 <CopyIcon data-icon />
                               </MessageAction>
@@ -273,10 +247,7 @@ export default function ChatPage() {
                       return (
                         <Reasoning
                           key={i}
-                          isStreaming={
-                            status === "streaming" &&
-                            message.id === messages.at(-1)?.id
-                          }
+                          isStreaming={status === "streaming" && message.id === messages.at(-1)?.id}
                         >
                           <ReasoningTrigger />
                           <ReasoningContent>{part.text}</ReasoningContent>
@@ -302,10 +273,7 @@ export default function ChatPage() {
           </PromptInputAttachments>
         </PromptInputHeader>
         <PromptInputBody>
-          <PromptInputTextarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
+          <PromptInputTextarea value={input} onChange={(e) => setInput(e.target.value)} />
         </PromptInputBody>
         <PromptInputFooter>
           <PromptInputTools>
@@ -454,8 +422,7 @@ import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 
 export async function POST(req: Request) {
-  const { question, answer }: { question: string; answer: string } =
-    await req.json();
+  const { question, answer }: { question: string; answer: string } = await req.json();
 
   const { output } = await generateText({
     model: openai("gpt-5.4-mini"),
@@ -479,7 +446,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useSuggestions(
   messages: { role: string; parts: { type: string; text?: string }[] }[],
-  status: string,
+  status: string
 ) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -498,8 +465,7 @@ export function useSuggestions(
     if (!lastUser || !lastAssistant) return;
 
     const question = lastUser.parts.find((p) => p.type === "text")?.text ?? "";
-    const answer =
-      lastAssistant.parts.find((p) => p.type === "text")?.text ?? "";
+    const answer = lastAssistant.parts.find((p) => p.type === "text")?.text ?? "";
 
     setIsLoading(true);
     fetch("/api/suggestions", {
@@ -532,10 +498,7 @@ import { useSuggestions } from "@/hooks/use-suggestions";
 const { messages, sendMessage, status } = useChat({
   transport: new DefaultChatTransport({ api: "/api/chat" }),
 });
-const { suggestions, isLoadingSuggestions, clearSuggestions } = useSuggestions(
-  messages,
-  status,
-);
+const { suggestions, isLoadingSuggestions, clearSuggestions } = useSuggestions(messages, status);
 
 const handleSuggestionClick = (suggestion: string) => {
   clearSuggestions();
