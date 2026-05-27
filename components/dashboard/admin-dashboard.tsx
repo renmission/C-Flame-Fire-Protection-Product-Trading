@@ -17,7 +17,7 @@ import {
 } from "recharts";
 import { Package, Truck, Banknote, Users } from "lucide-react";
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+const COLORS = ["#ef233c", "#2b2d42", "#8d99ae", "#d90429", "#a8b4c2"];
 
 export function AdminDashboard() {
   const { data, isLoading } = useQuery({
@@ -103,7 +103,7 @@ export function AdminDashboard() {
                 <XAxis dataKey="type" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="count" fill="#8884d8" />
+                <Bar dataKey="count" fill="#ef233c" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -123,7 +123,7 @@ export function AdminDashboard() {
                   labelLine={false}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill="#ef233c"
                   dataKey="value"
                 >
                   {deliveryStatusData.map((entry, index) => (

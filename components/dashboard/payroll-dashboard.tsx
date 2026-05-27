@@ -95,7 +95,7 @@ export function PayrollDashboard() {
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="count" fill="#8884d8" />
+              <Bar dataKey="count" fill="#2b2d42" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

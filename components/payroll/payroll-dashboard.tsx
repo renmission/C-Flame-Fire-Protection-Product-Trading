@@ -963,14 +963,14 @@ function PayslipViewDialog({ payslipId, onClose }: { payslipId: string; onClose:
               margin: 0 auto;
             }
             .payslip-container {
-              border: 2px solid #1f2937;
+              border: 2px solid #2b2d42;
               border-radius: 8px;
               padding: 24px;
               background: white;
             }
             .header {
               text-align: center;
-              border-bottom: 2px solid #1f2937;
+              border-bottom: 2px solid #2b2d42;
               padding-bottom: 16px;
               margin-bottom: 24px;
             }
@@ -1035,7 +1035,7 @@ function PayslipViewDialog({ payslipId, onClose }: { payslipId: string; onClose:
               justify-content: space-between;
               margin-top: 16px;
               padding-top: 12px;
-              border-top: 2px solid #1f2937;
+              border-top: 2px solid #2b2d42;
             }
             .total-label {
               font-weight: bold;
@@ -1047,7 +1047,7 @@ function PayslipViewDialog({ payslipId, onClose }: { payslipId: string; onClose:
             }
             .net-pay {
               padding-top: 16px;
-              border-top: 4px solid #1f2937;
+              border-top: 4px solid #2b2d42;
             }
             .net-pay-label {
               font-weight: bold;

@@ -117,9 +117,9 @@ export function InventoryDashboard() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="in" fill="#00C49F" name="In" />
-              <Bar dataKey="out" fill="#FF8042" name="Out" />
-              <Bar dataKey="adjustment" fill="#FFBB28" name="Adjustment" />
+              <Bar dataKey="in" fill="#2b2d42" name="In" />
+              <Bar dataKey="out" fill="#ef233c" name="Out" />
+              <Bar dataKey="adjustment" fill="#8d99ae" name="Adjustment" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
