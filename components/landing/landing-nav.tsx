@@ -30,7 +30,7 @@ export function LandingNav() {
           />
           <div className="hidden lg:flex flex-col leading-tight">
             <span
-              className="text-3xl font-bold uppercase tracking-wide text-foreground"
+              className="text-3xl font-bold uppercase tracking-wide text-primary"
               style={{ fontFamily: "var(--font-oswald)" }}
             >
               C&apos;FLAME
