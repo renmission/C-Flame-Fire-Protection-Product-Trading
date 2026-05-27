@@ -720,19 +720,38 @@ export function ReportsDashboard({ user }: { user: SessionUser | null }) {
             <CardHeader className="pb-4 p-4 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base">Stock Levels</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full sm:w-auto min-h-9 touch-manipulation"
-                  onClick={() =>
-                    downloadCSV("/api/reports/inventory/stock-levels", {
-                      category: inventoryCategory || undefined,
-                    })
-                  }
-                >
-                  <IconDownload className="mr-2 h-4 w-4" />
-                  Export CSV
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() =>
+                      downloadCSV("/api/reports/inventory/stock-levels", {
+                        category: inventoryCategory || undefined,
+                      })
+                    }
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      if (inventoryCategory) params.append("category", inventoryCategory);
+                      params.append("format", "pdf");
+                      window.open(
+                        `/api/reports/inventory/stock-levels?${params.toString()}`,
+                        "_blank"
+                      );
+                    }}
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export PDF
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -780,15 +799,28 @@ export function ReportsDashboard({ user }: { user: SessionUser | null }) {
             <CardHeader className="pb-4 p-4 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base">Low Stock Items</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full sm:w-auto min-h-9 touch-manipulation"
-                  onClick={() => downloadCSV("/api/reports/inventory/low-stock", {})}
-                >
-                  <IconDownload className="mr-2 h-4 w-4" />
-                  Export CSV
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() => downloadCSV("/api/reports/inventory/low-stock", {})}
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() => {
+                      window.open("/api/reports/inventory/low-stock?format=pdf", "_blank");
+                    }}
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export PDF
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -874,6 +906,24 @@ export function ReportsDashboard({ user }: { user: SessionUser | null }) {
                   >
                     <IconDownload className="mr-2 h-4 w-4" />
                     Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      if (inventoryDateFrom) params.append("dateFrom", inventoryDateFrom);
+                      if (inventoryDateTo) params.append("dateTo", inventoryDateTo);
+                      params.append("format", "pdf");
+                      window.open(
+                        `/api/reports/inventory/movement-summary?${params.toString()}`,
+                        "_blank"
+                      );
+                    }}
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export PDF
                   </Button>
                 </div>
               </div>
@@ -961,20 +1011,40 @@ export function ReportsDashboard({ user }: { user: SessionUser | null }) {
             <CardHeader className="pb-4 p-4 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base">Payslips by Period</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full sm:w-auto min-h-9 touch-manipulation"
-                  onClick={() =>
-                    downloadCSV("/api/reports/payroll/payslips-by-period", {
-                      dateFrom: payrollDateFrom || undefined,
-                      dateTo: payrollDateTo || undefined,
-                    })
-                  }
-                >
-                  <IconDownload className="mr-2 h-4 w-4" />
-                  Export CSV
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() =>
+                      downloadCSV("/api/reports/payroll/payslips-by-period", {
+                        dateFrom: payrollDateFrom || undefined,
+                        dateTo: payrollDateTo || undefined,
+                      })
+                    }
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      if (payrollDateFrom) params.append("dateFrom", payrollDateFrom);
+                      if (payrollDateTo) params.append("dateTo", payrollDateTo);
+                      params.append("format", "pdf");
+                      window.open(
+                        `/api/reports/payroll/payslips-by-period?${params.toString()}`,
+                        "_blank"
+                      );
+                    }}
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export PDF
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -1027,20 +1097,40 @@ export function ReportsDashboard({ user }: { user: SessionUser | null }) {
             <CardHeader className="pb-4 p-4 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base">Employee Summary</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full sm:w-auto min-h-9 touch-manipulation"
-                  onClick={() =>
-                    downloadCSV("/api/reports/payroll/employee-summary", {
-                      dateFrom: payrollDateFrom || undefined,
-                      dateTo: payrollDateTo || undefined,
-                    })
-                  }
-                >
-                  <IconDownload className="mr-2 h-4 w-4" />
-                  Export CSV
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() =>
+                      downloadCSV("/api/reports/payroll/employee-summary", {
+                        dateFrom: payrollDateFrom || undefined,
+                        dateTo: payrollDateTo || undefined,
+                      })
+                    }
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      if (payrollDateFrom) params.append("dateFrom", payrollDateFrom);
+                      if (payrollDateTo) params.append("dateTo", payrollDateTo);
+                      params.append("format", "pdf");
+                      window.open(
+                        `/api/reports/payroll/employee-summary?${params.toString()}`,
+                        "_blank"
+                      );
+                    }}
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export PDF
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -1090,20 +1180,40 @@ export function ReportsDashboard({ user }: { user: SessionUser | null }) {
             <CardHeader className="pb-4 p-4 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base">Deductions Breakdown</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full sm:w-auto min-h-9 touch-manipulation"
-                  onClick={() =>
-                    downloadCSV("/api/reports/payroll/deductions-breakdown", {
-                      dateFrom: payrollDateFrom || undefined,
-                      dateTo: payrollDateTo || undefined,
-                    })
-                  }
-                >
-                  <IconDownload className="mr-2 h-4 w-4" />
-                  Export CSV
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() =>
+                      downloadCSV("/api/reports/payroll/deductions-breakdown", {
+                        dateFrom: payrollDateFrom || undefined,
+                        dateTo: payrollDateTo || undefined,
+                      })
+                    }
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      if (payrollDateFrom) params.append("dateFrom", payrollDateFrom);
+                      if (payrollDateTo) params.append("dateTo", payrollDateTo);
+                      params.append("format", "pdf");
+                      window.open(
+                        `/api/reports/payroll/deductions-breakdown?${params.toString()}`,
+                        "_blank"
+                      );
+                    }}
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export PDF
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -1199,21 +1309,42 @@ export function ReportsDashboard({ user }: { user: SessionUser | null }) {
             <CardHeader className="pb-4 p-4 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base">Deliveries by Status</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full sm:w-auto min-h-9 touch-manipulation"
-                  onClick={() =>
-                    downloadCSV("/api/reports/deliveries/by-status", {
-                      dateFrom: deliveryDateFrom || undefined,
-                      dateTo: deliveryDateTo || undefined,
-                      status: deliveryStatus || undefined,
-                    })
-                  }
-                >
-                  <IconDownload className="mr-2 h-4 w-4" />
-                  Export CSV
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() =>
+                      downloadCSV("/api/reports/deliveries/by-status", {
+                        dateFrom: deliveryDateFrom || undefined,
+                        dateTo: deliveryDateTo || undefined,
+                        status: deliveryStatus || undefined,
+                      })
+                    }
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      if (deliveryDateFrom) params.append("dateFrom", deliveryDateFrom);
+                      if (deliveryDateTo) params.append("dateTo", deliveryDateTo);
+                      if (deliveryStatus) params.append("status", deliveryStatus);
+                      params.append("format", "pdf");
+                      window.open(
+                        `/api/reports/deliveries/by-status?${params.toString()}`,
+                        "_blank"
+                      );
+                    }}
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export PDF
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -1288,20 +1419,40 @@ export function ReportsDashboard({ user }: { user: SessionUser | null }) {
             <CardHeader className="pb-4 p-4 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base">Deliveries by Date Range</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full sm:w-auto min-h-9 touch-manipulation"
-                  onClick={() =>
-                    downloadCSV("/api/reports/deliveries/by-date-range", {
-                      dateFrom: deliveryDateFrom || undefined,
-                      dateTo: deliveryDateTo || undefined,
-                    })
-                  }
-                >
-                  <IconDownload className="mr-2 h-4 w-4" />
-                  Export CSV
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() =>
+                      downloadCSV("/api/reports/deliveries/by-date-range", {
+                        dateFrom: deliveryDateFrom || undefined,
+                        dateTo: deliveryDateTo || undefined,
+                      })
+                    }
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto min-h-9 touch-manipulation"
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      if (deliveryDateFrom) params.append("dateFrom", deliveryDateFrom);
+                      if (deliveryDateTo) params.append("dateTo", deliveryDateTo);
+                      params.append("format", "pdf");
+                      window.open(
+                        `/api/reports/deliveries/by-date-range?${params.toString()}`,
+                        "_blank"
+                      );
+                    }}
+                  >
+                    <IconDownload className="mr-2 h-4 w-4" />
+                    Export PDF
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">

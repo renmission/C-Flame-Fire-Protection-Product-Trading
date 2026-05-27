@@ -69,13 +69,13 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
   const { title, subtitle, generatedAt, filters, data, columns } = options;
 
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([595, 842]); // A4 size in points
+  let currentPage = pdfDoc.addPage([595, 842]); // A4 size in points
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   const margin = 50;
-  const pageWidth = page.getWidth() - margin * 2;
-  let y = page.getHeight() - margin;
+  const pageWidth = currentPage.getWidth() - margin * 2;
+  let y = currentPage.getHeight() - margin;
 
   // Helper function to draw text
   const drawText = (
@@ -107,7 +107,7 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
       finalX = x + maxWidth - textWidth;
     }
 
-    page.drawText(text, {
+    currentPage.drawText(text, {
       x: finalX,
       y: yPos,
       size,
@@ -180,7 +180,7 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
 
     // Table header
     let x = margin;
-    page.drawRectangle({
+    currentPage.drawRectangle({
       x: margin,
       y: y - headerHeight,
       width: pageWidth,
@@ -204,13 +204,13 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
     data.forEach((row, rowIdx) => {
       // Check if we need a new page
       if (y < margin + rowHeight) {
-        pdfDoc.addPage([595, 842]);
-        y = page.getHeight() - margin;
+        currentPage = pdfDoc.addPage([595, 842]);
+        y = 842 - margin;
       }
 
       // Alternate row background
       if (rowIdx % 2 === 1) {
-        page.drawRectangle({
+        currentPage.drawRectangle({
           x: margin,
           y: y - rowHeight,
           width: pageWidth,
@@ -234,7 +234,7 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
       });
 
       // Row border
-      page.drawLine({
+      currentPage.drawLine({
         start: { x: margin, y: y - rowHeight },
         end: { x: margin + pageWidth, y: y - rowHeight },
         thickness: 0.5,

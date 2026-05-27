@@ -68,12 +68,12 @@ export async function GET(req: NextRequest) {
     if (q.format === "csv") {
       const csv = [
         ["Metric", "Value"].join(","),
-        ["Total Revenue", formatMoney(data.totalRevenue)].join(","),
+        ["Total Revenue", `"${formatMoney(data.totalRevenue)}"`].join(","),
         ["Total Transactions", data.transactionCount].join(","),
         ["Completed Sales", data.completedCount].join(","),
         ["Voided Sales", data.voidedCount].join(","),
-        ["Average Order Value", formatMoney(data.avgOrderValue)].join(","),
-        ["Total Discounts Given", formatMoney(data.totalDiscounts)].join(","),
+        ["Average Order Value", `"${formatMoney(data.avgOrderValue)}"`].join(","),
+        ["Total Discounts Given", `"${formatMoney(data.totalDiscounts)}"`].join(","),
       ].join("\n");
 
       return new Response(csv, {
