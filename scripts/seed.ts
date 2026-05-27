@@ -1,5 +1,5 @@
 /**
- * Seed script: creates roles, an admin user, and sample inventory for development.
+ * Seed script: creates roles, admin user, fire protection inventory, categories, units, and departments.
  * Run: pnpm db:seed
  * Requires DATABASE_URL and optionally ADMIN_EMAIL, ADMIN_PASSWORD in env.
  */
@@ -21,184 +21,77 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { ROLES } from "../lib/auth/permissions";
 
-/** Sample inventory items (construction materials & supplies). listPrice in PHP (₱). */
+/** Fire protection product inventory. listPrice in PHP (₱). */
 const SAMPLE_PRODUCTS = [
-  {
-    sku: "CEM-50",
-    name: "Portland Cement 50kg",
-    category: "Cement",
-    unit: "bag",
-    reorderLevel: 20,
-    listPrice: 285,
-  },
-  {
-    sku: "CEM-40",
-    name: "Portland Cement 40kg",
-    category: "Cement",
-    unit: "bag",
-    reorderLevel: 15,
-    listPrice: 235,
-  },
-  {
-    sku: "SND-1",
-    name: "Sand (cu.m)",
-    category: "Aggregates",
-    unit: "cu.m",
-    reorderLevel: 5,
-    listPrice: 850,
-  },
-  {
-    sku: "GRV-1",
-    name: "Gravel (cu.m)",
-    category: "Aggregates",
-    unit: "cu.m",
-    reorderLevel: 5,
-    listPrice: 920,
-  },
-  {
-    sku: "RBR-10",
-    name: "Rebar 10mm x 6m",
-    category: "Steel",
-    unit: "pcs",
-    reorderLevel: 50,
-    listPrice: 185,
-  },
-  {
-    sku: "RBR-12",
-    name: "Rebar 12mm x 6m",
-    category: "Steel",
-    unit: "pcs",
-    reorderLevel: 40,
-    listPrice: 265,
-  },
-  {
-    sku: "PLY-4x8",
-    name: "Plywood 4x8 ft",
-    category: "Lumber",
-    unit: "sheet",
-    reorderLevel: 30,
-    listPrice: 720,
-  },
-  {
-    sku: "LBR-2x4x8",
-    name: "Lumber 2x4x8",
-    category: "Lumber",
-    unit: "pcs",
-    reorderLevel: 100,
-    listPrice: 95,
-  },
-  {
-    sku: "LBR-2x6x8",
-    name: "Lumber 2x6x8",
-    category: "Lumber",
-    unit: "pcs",
-    reorderLevel: 80,
-    listPrice: 145,
-  },
-  {
-    sku: "NIL-2",
-    name: 'Common Nails 2"',
-    category: "Hardware",
-    unit: "kg",
-    reorderLevel: 25,
-    listPrice: 58,
-  },
-  {
-    sku: "NIL-3",
-    name: 'Common Nails 3"',
-    category: "Hardware",
-    unit: "kg",
-    reorderLevel: 20,
-    listPrice: 62,
-  },
-  {
-    sku: "PVC-4",
-    name: 'PVC Pipe 4"',
-    category: "Plumbing",
-    unit: "pcs",
-    reorderLevel: 30,
-    listPrice: 380,
-  },
-  {
-    sku: "PVC-2",
-    name: 'PVC Pipe 2"',
-    category: "Plumbing",
-    unit: "pcs",
-    reorderLevel: 50,
-    listPrice: 125,
-  },
-  {
-    sku: "WIR-12",
-    name: "Electrical Wire 12 AWG",
-    category: "Electrical",
-    unit: "m",
-    reorderLevel: 200,
-    listPrice: 28,
-  },
-  {
-    sku: "WIR-14",
-    name: "Electrical Wire 14 AWG",
-    category: "Electrical",
-    unit: "m",
-    reorderLevel: 200,
-    listPrice: 18,
-  },
-  {
-    sku: "PNT-W1",
-    name: "White Latex Paint 1gal",
-    category: "Paint",
-    unit: "gal",
-    reorderLevel: 20,
-    listPrice: 420,
-  },
-  {
-    sku: "PNT-W4",
-    name: "White Latex Paint 4gal",
-    category: "Paint",
-    unit: "gal",
-    reorderLevel: 10,
-    listPrice: 1580,
-  },
-  {
-    sku: "TIL-30x30",
-    name: "Floor Tile 30x30cm",
-    category: "Tiles",
-    unit: "box",
-    reorderLevel: 50,
-    listPrice: 185,
-  },
-  {
-    sku: "GRT-25",
-    name: "Grout 25kg",
-    category: "Tiles",
-    unit: "bag",
-    reorderLevel: 10,
-    listPrice: 245,
-  },
+  // Fire Extinguishers
+  { sku: "FE-ABC-1", name: "ABC Dry Chemical Fire Extinguisher 1kg", category: "Fire Extinguishers", unit: "pcs", listPrice: 850, reorderLevel: 10 },
+  { sku: "FE-ABC-3", name: "ABC Dry Chemical Fire Extinguisher 3kg", category: "Fire Extinguishers", unit: "pcs", listPrice: 1200, reorderLevel: 15 },
+  { sku: "FE-ABC-6", name: "ABC Dry Chemical Fire Extinguisher 6kg", category: "Fire Extinguishers", unit: "pcs", listPrice: 1800, reorderLevel: 10 },
+  { sku: "FE-ABC-10", name: "ABC Dry Chemical Fire Extinguisher 10kg", category: "Fire Extinguishers", unit: "pcs", listPrice: 2800, reorderLevel: 8 },
+  { sku: "FE-CO2-23", name: "Carbon Dioxide Fire Extinguisher 2.3kg", category: "Fire Extinguishers", unit: "pcs", listPrice: 2500, reorderLevel: 10 },
+  { sku: "FE-CO2-45", name: "Carbon Dioxide Fire Extinguisher 4.5kg", category: "Fire Extinguishers", unit: "pcs", listPrice: 3800, reorderLevel: 8 },
+  { sku: "FE-WC-2L", name: "Wet Chemical Fire Extinguisher 2L", category: "Fire Extinguishers", unit: "pcs", listPrice: 2200, reorderLevel: 5 },
+  // Fire Detection
+  { sku: "FD-AFACP", name: "Addressable Fire Alarm Control Panel 2-Loop", category: "Fire Detection", unit: "pcs", listPrice: 28500, reorderLevel: 2 },
+  { sku: "FD-CFACP", name: "Conventional Fire Alarm Control Panel 4-Zone", category: "Fire Detection", unit: "pcs", listPrice: 9500, reorderLevel: 3 },
+  { sku: "FD-SMA", name: "Smoke Detector Addressable", category: "Fire Detection", unit: "pcs", listPrice: 1250, reorderLevel: 20 },
+  { sku: "FD-SMC", name: "Smoke Detector Conventional", category: "Fire Detection", unit: "pcs", listPrice: 450, reorderLevel: 30 },
+  { sku: "FD-HT", name: "Heat Detector", category: "Fire Detection", unit: "pcs", listPrice: 380, reorderLevel: 20 },
+  { sku: "FD-MCP", name: "Manual Call Point / Break Glass", category: "Fire Detection", unit: "pcs", listPrice: 650, reorderLevel: 15 },
+  { sku: "FD-SND", name: "Sounder/Strobe Alarm Unit", category: "Fire Detection", unit: "pcs", listPrice: 1100, reorderLevel: 15 },
+  // Fire Suppression
+  { sku: "FS-SPH-STD", name: "Standard Sprinkler Head", category: "Fire Suppression", unit: "pcs", listPrice: 285, reorderLevel: 50 },
+  { sku: "FS-SPH-UPR", name: "Upright Sprinkler Head", category: "Fire Suppression", unit: "pcs", listPrice: 310, reorderLevel: 40 },
+  { sku: "FS-FBL", name: "Fire Blanket 1.2m x 1.8m", category: "Fire Suppression", unit: "pcs", listPrice: 950, reorderLevel: 10 },
+  // Hose & Fittings
+  { sku: "HF-FH-15", name: 'Fire Hose 1.5" x 30m', category: "Hose & Fittings", unit: "pcs", listPrice: 1850, reorderLevel: 10 },
+  { sku: "HF-FH-25", name: 'Fire Hose 2.5" x 30m', category: "Hose & Fittings", unit: "pcs", listPrice: 2650, reorderLevel: 8 },
+  { sku: "HF-FHC", name: "Fire Hose Cabinet", category: "Hose & Fittings", unit: "pcs", listPrice: 3500, reorderLevel: 5 },
+  // Protective Equipment
+  { sku: "PE-FFS", name: "Firefighter Protective Suit (Full Set)", category: "Protective Equipment", unit: "set", listPrice: 12500, reorderLevel: 3 },
+  { sku: "PE-FFH", name: "Firefighter Helmet", category: "Protective Equipment", unit: "pcs", listPrice: 2800, reorderLevel: 5 },
+  { sku: "PE-FFG", name: "Firefighter Gloves", category: "Protective Equipment", unit: "pcs", listPrice: 650, reorderLevel: 10 },
+  { sku: "PE-SCBA", name: "Self-Contained Breathing Apparatus", category: "Protective Equipment", unit: "set", listPrice: 35000, reorderLevel: 2 },
+  // Signage & Safety
+  { sku: "SS-FES", name: "Fire Exit Sign LED", category: "Signage & Safety", unit: "pcs", listPrice: 850, reorderLevel: 10 },
+  { sku: "SS-ELU", name: "Emergency Lighting Unit", category: "Signage & Safety", unit: "pcs", listPrice: 1250, reorderLevel: 8 },
+  { sku: "SS-FEB", name: "Fire Extinguisher Bracket", category: "Signage & Safety", unit: "pcs", listPrice: 180, reorderLevel: 20 },
 ];
 
-/** Inventory categories (used in Inventory). */
+/** Inventory categories for fire protection products. */
 const SAMPLE_CATEGORIES = [
-  "Aggregates",
-  "Cement",
-  "Electrical",
-  "Hardware",
-  "Lumber",
-  "Paint",
-  "Plumbing",
-  "Steel",
-  "Tiles",
+  "Fire Extinguishers",
+  "Fire Detection",
+  "Fire Suppression",
+  "Hose & Fittings",
+  "Protective Equipment",
+  "Signage & Safety",
 ];
 
-/** Inventory units (used in Inventory). */
-const SAMPLE_UNITS = ["bag", "box", "cu.m", "gal", "kg", "m", "pcs", "sheet"];
+/** Inventory units. */
+const SAMPLE_UNITS = ["pcs", "set", "m", "kg", "roll", "box"];
 
-/** Sample departments (used in Users and Employees). */
-const SAMPLE_DEPARTMENTS = ["HR", "IT", "Operations", "Finance", "Sales", "Marketing", "Logistics"];
+/** Departments for C'FLAME Fire Protection Product Trading. */
+const SAMPLE_DEPARTMENTS = [
+  "Administration",
+  "Sales",
+  "Logistics",
+  "Warehouse",
+  "Finance",
+  "Technical Services",
+];
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@cflame.local";
+const ROLE_DEPARTMENT_MAP: Record<string, string> = {
+  admin: "Administration",
+  payroll_manager: "Finance",
+  inventory_manager: "Warehouse",
+  delivery_staff: "Logistics",
+  pos_cashier: "Sales",
+  viewer: "Administration",
+};
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@cflame.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "admin123";
-const VIEWER_EMAIL = "viewer@cflame.local";
 
 async function seed() {
   const roleNames = Object.values(ROLES);
@@ -217,11 +110,7 @@ async function seed() {
   if (existing.length === 0) {
     const [inserted] = await db
       .insert(users)
-      .values({
-        email: ADMIN_EMAIL,
-        name: "Admin",
-        passwordHash,
-      })
+      .values({ email: ADMIN_EMAIL, name: "Admin", passwordHash })
       .returning({ id: users.id });
     if (inserted?.id) {
       await db
@@ -242,7 +131,7 @@ async function seed() {
     console.log("Updated existing admin user:", ADMIN_EMAIL);
   }
 
-  // --- Sample inventory ---
+  // --- Inventory ---
   for (const p of SAMPLE_PRODUCTS) {
     const [inserted] = await db
       .insert(products)
@@ -252,7 +141,7 @@ async function seed() {
         category: p.category,
         unit: p.unit,
         reorderLevel: p.reorderLevel,
-        listPrice: p.listPrice != null ? String(p.listPrice) : null,
+        listPrice: String(p.listPrice),
       })
       .onConflictDoNothing({ target: products.sku })
       .returning({ id: products.id });
@@ -264,9 +153,7 @@ async function seed() {
     }
   }
 
-  // Update listPrice on existing products (so re-running seed applies prices)
   for (const p of SAMPLE_PRODUCTS) {
-    if (p.listPrice == null) continue;
     await db
       .update(products)
       .set({ listPrice: String(p.listPrice), updatedAt: new Date() })
@@ -299,7 +186,7 @@ async function seed() {
       .onConflictDoNothing({ target: inventoryUnits.name });
   }
 
-  // --- Sample departments ---
+  // --- Departments ---
   for (const name of SAMPLE_DEPARTMENTS) {
     await db.insert(departments).values({ name }).onConflictDoNothing({ target: departments.name });
   }
@@ -307,25 +194,12 @@ async function seed() {
   // --- Assign departments to existing users based on roles ---
   const allUsers = await db.select().from(users);
   const allDepartments = await db.select().from(departments);
-  const allRoles = await db.select().from(roles);
 
   const departmentMap = new Map(allDepartments.map((d) => [d.name.toLowerCase(), d.id]));
-  const roleMap = new Map(allRoles.map((r) => [r.name, r.id]));
-
-  const ROLE_DEPARTMENT_MAP: Record<string, string> = {
-    admin: "IT",
-    payroll_manager: "Finance",
-    inventory_manager: "Operations",
-    delivery_staff: "Logistics",
-    pos_cashier: "Sales",
-    viewer: "Operations",
-  };
 
   for (const user of allUsers) {
-    // Skip if user already has a department
     if (user.departmentId) continue;
 
-    // Get user's roles
     const userRoleRows = await db
       .select({ roleName: roles.name })
       .from(userRoles)
@@ -335,27 +209,23 @@ async function seed() {
     const userRolesList = userRoleRows.map((r) => r.roleName).filter(Boolean);
     if (userRolesList.length === 0) continue;
 
-    // Find department based on primary role
     const primaryRole = userRolesList.includes("admin") ? "admin" : (userRolesList[0] ?? "");
-
     const departmentName = ROLE_DEPARTMENT_MAP[primaryRole];
     if (!departmentName) continue;
 
     const departmentId = departmentMap.get(departmentName.toLowerCase());
     if (!departmentId) continue;
 
-    // Assign department
     await db.update(users).set({ departmentId }).where(eq(users.id, user.id));
     console.log(`Assigned ${user.email} (${primaryRole}) → ${departmentName}`);
   }
 
-  // --- Create employee records for all non-admin users (for attendance module) ---
+  // --- Create employee records for non-admin users ---
   const allUsersForEmployees = await db.select().from(users);
 
   for (const u of allUsersForEmployees) {
     if (!u.email) continue;
 
-    // Check if user is admin
     const userRoleRows = await db
       .select({ roleName: roles.name })
       .from(userRoles)
@@ -364,11 +234,8 @@ async function seed() {
 
     const userRolesList = userRoleRows.map((r) => r.roleName).filter(Boolean);
     const isAdmin = userRolesList.includes(ROLES.ADMIN);
-
-    // Skip admin users (they don't submit attendance)
     if (isAdmin) continue;
 
-    // Check if employee record already exists
     const existingEmployee = await db
       .select()
       .from(employees)
@@ -376,21 +243,19 @@ async function seed() {
       .limit(1);
 
     if (existingEmployee.length === 0) {
-      // Determine department based on role
       const primaryRole = userRolesList[0] ?? "viewer";
-      const departmentName = ROLE_DEPARTMENT_MAP[primaryRole] ?? "General";
+      const departmentName = ROLE_DEPARTMENT_MAP[primaryRole] ?? "Administration";
 
       await db.insert(employees).values({
         userId: u.id,
         name: u.name ?? u.email.split("@")[0],
         email: u.email,
         department: departmentName,
-        rate: "1000.00", // Default rate
+        rate: "1000.00",
         active: 1,
       });
       console.log(`Created employee record for: ${u.email} (${primaryRole})`);
     } else if (!existingEmployee[0].userId) {
-      // Link the existing employee correctly
       await db
         .update(employees)
         .set({ userId: u.id })
