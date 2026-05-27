@@ -613,11 +613,7 @@ export function generateStaticParams() {
 // app/[slug]/page.tsx
 import { Suspense } from "react";
 
-export default function Page({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default function Page({ params }: { params: Promise<{ slug: string }> }) {
   return (
     <Suspense fallback={<PageSkeleton />}>
       <DynamicContent params={params} />
@@ -636,11 +632,7 @@ export default function Page({
 
 ```tsx
 // ❌ WRONG: Passing params Promise into cached component
-async function CachedContent({
-  paramsPromise,
-}: {
-  paramsPromise: Promise<{ id: string }>;
-}) {
+async function CachedContent({ paramsPromise }: { paramsPromise: Promise<{ id: string }> }) {
   "use cache";
   const { id } = await paramsPromise; // Hangs at build time!
   return await fetchData(id);
@@ -657,11 +649,7 @@ async function CachedContent({ id }: { id: string }) {
   return await fetchData(id);
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   return <CachedContent id={id} />;
 }
@@ -830,7 +818,7 @@ cacheTag(
   "posts", // All posts
   `category-${category}`, // Posts in category
   `post-${id}`, // Specific post
-  `author-${authorId}`, // Author's posts
+  `author-${authorId}` // Author's posts
 );
 
 // Invalidate at appropriate level

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolInput,
-} from "@/components/ai-elements/tool";
+import { Tool, ToolContent, ToolHeader, ToolInput } from "@/components/ai-elements/tool";
 import { nanoid } from "nanoid";
 
 const toolCall = {

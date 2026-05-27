@@ -54,14 +54,11 @@ const outputSchema = `z.object({
 export default function Page() {
   return (
     <Agent>
-      <AgentHeader
-        name="Sentiment Analyzer"
-        model="anthropic/claude-sonnet-4-6"
-      />
+      <AgentHeader name="Sentiment Analyzer" model="anthropic/claude-sonnet-4-6" />
       <AgentContent>
         <AgentInstructions>
-          Analyze the sentiment of the provided text and return a structured
-          analysis with sentiment classification, confidence score, and summary.
+          Analyze the sentiment of the provided text and return a structured analysis with sentiment
+          classification, confidence score, and summary.
         </AgentInstructions>
         <AgentTools>
           <AgentTool tool={webSearch} value="web_search" />

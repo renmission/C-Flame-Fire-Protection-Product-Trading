@@ -123,11 +123,7 @@ import { YouTubeEmbed } from "@next/third-parties/google";
 // Google Maps
 import { GoogleMapsEmbed } from "@next/third-parties/google";
 
-<GoogleMapsEmbed
-  apiKey="YOUR_API_KEY"
-  mode="place"
-  q="Brooklyn+Bridge,New+York,NY"
-/>;
+<GoogleMapsEmbed apiKey="YOUR_API_KEY" mode="place" q="Brooklyn+Bridge,New+York,NY" />;
 ```
 
 ## Quick Reference

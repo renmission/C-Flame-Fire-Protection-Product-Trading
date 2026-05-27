@@ -33,7 +33,7 @@ export const chatMessages = pgTable(
   (table) => ({
     // Prevents duplicate saves (idempotent onFinish)
     chatMessageUnique: uniqueIndex("...").on(table.chatId, table.messageId),
-  }),
+  })
 );
 ```
 
@@ -91,7 +91,7 @@ onFinish: async ({ messages: finishedMessages }) => {
           .map((p) => p.text)
           .join(""),
         rawParts: m.parts as unknown[], // keep full parts for tool results
-      })),
+      }))
     )
     .onConflictDoNothing(); // idempotent — safe to retry
 };
@@ -110,9 +110,7 @@ onFinish: async ({ messages: finishedMessages }) => {
 const result = await db
   .update(chatMessages)
   .set({ feedback })
-  .where(
-    and(eq(chatMessages.chatId, chatId), eq(chatMessages.messageId, messageId)),
-  )
+  .where(and(eq(chatMessages.chatId, chatId), eq(chatMessages.messageId, messageId)))
   .returning({ id: chatMessages.id });
 
 if (result.length === 0) {
@@ -131,7 +129,7 @@ async function submitFeedback(
   messageId: string,
   vote: "up" | "down" | null,
   attempt: number,
-  isCancelled: () => boolean, // prevents stale retries if user changes vote
+  isCancelled: () => boolean // prevents stale retries if user changes vote
 ): Promise<void> {
   if (isCancelled()) return;
 
@@ -157,13 +155,9 @@ const handleFeedback = (vote: "up" | "down") => {
   setFeedback(newVote); // optimistic
 
   const generation = ++generationRef.current;
-  submitFeedback(
-    chatId,
-    messageId,
-    newVote,
-    0,
-    () => generationRef.current !== generation,
-  ).catch(() => setFeedback(previousFeedback)); // revert on failure
+  submitFeedback(chatId, messageId, newVote, 0, () => generationRef.current !== generation).catch(
+    () => setFeedback(previousFeedback)
+  ); // revert on failure
 };
 ```
 

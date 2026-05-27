@@ -57,10 +57,7 @@ You can inject custom components to be used within the rendered JSX:
 ```tsx title="components/generated-ui-with-components.tsx"
 "use client";
 
-import {
-  JSXPreview,
-  JSXPreviewContent,
-} from "@/components/ai-elements/jsx-preview";
+import { JSXPreview, JSXPreviewContent } from "@/components/ai-elements/jsx-preview";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 

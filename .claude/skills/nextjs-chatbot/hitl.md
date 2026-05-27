@@ -65,10 +65,7 @@ if (part.type === "tool-myApprovalTool") {
   };
 
   // Loading
-  if (
-    toolPart.state === "input-streaming" ||
-    toolPart.state === "input-available"
-  ) {
+  if (toolPart.state === "input-streaming" || toolPart.state === "input-available") {
     return <Shimmer>Finding options...</Shimmer>;
   }
 
@@ -117,18 +114,12 @@ if (part.type === "tool-myApprovalTool") {
 
   // User denied
   if (toolPart.state === "output-denied") {
-    return (
-      <div className="text-muted-foreground text-sm">Request cancelled.</div>
-    );
+    return <div className="text-muted-foreground text-sm">Request cancelled.</div>;
   }
 
   // Tool error
   if (toolPart.state === "output-error") {
-    return (
-      <div className="text-destructive text-sm">
-        Error: {toolPart.errorText}
-      </div>
-    );
+    return <div className="text-destructive text-sm">Error: {toolPart.errorText}</div>;
   }
 
   return null;

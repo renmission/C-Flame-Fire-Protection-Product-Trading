@@ -15,6 +15,13 @@
       "when": 1778089507812,
       "tag": "0001_shocking_princess_powerful",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779895656489,
+      "tag": "0002_cheerful_speed_demon",
+      "breakpoints": true
     }
   ]
 }

@@ -297,10 +297,9 @@ Scroll-triggered sequences?
 
 ```tsx
 // Lazy load animation library
-const MotionDiv = dynamic(
-  () => import("motion/react").then((mod) => mod.motion.div),
-  { ssr: false },
-);
+const MotionDiv = dynamic(() => import("motion/react").then((mod) => mod.motion.div), {
+  ssr: false,
+});
 ```
 
 ## Decorative Backgrounds
@@ -326,7 +325,7 @@ export function GridBackground({
       <div
         className={cn(
           "absolute inset-0 -z-10",
-          "[background-image:linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)]",
+          "[background-image:linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)]"
         )}
         style={{ backgroundSize: `${size}px ${size}px` }}
       />
@@ -352,7 +351,7 @@ export function DotBackground({
         className={cn(
           "absolute inset-0 -z-10",
           "[background-size:20px_20px]",
-          "[background-image:radial-gradient(hsl(var(--muted-foreground)/0.3)_1px,transparent_1px)]",
+          "[background-image:radial-gradient(hsl(var(--muted-foreground)/0.3)_1px,transparent_1px)]"
         )}
       />
       {children}
@@ -406,17 +405,13 @@ import { cn } from "@/lib/utils";
 export function Spotlight({ className }: { className?: string }) {
   return (
     <motion.div
-      className={cn(
-        "pointer-events-none fixed inset-0 -z-10 overflow-hidden",
-        className,
-      )}
+      className={cn("pointer-events-none fixed inset-0 -z-10 overflow-hidden", className)}
       aria-hidden
     >
       <motion.div
         className="absolute top-0 left-1/2 h-[60vh] w-[80vw] -translate-x-1/2 rounded-full opacity-20 blur-3xl"
         style={{
-          background:
-            "radial-gradient(ellipse, hsl(var(--primary) / 0.3), transparent 70%)",
+          background: "radial-gradient(ellipse, hsl(var(--primary) / 0.3), transparent 70%)",
         }}
         animate={{ x: ["-10%", "10%", "-10%"] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
@@ -449,19 +444,14 @@ type SectionProps = {
   className?: string;
 };
 
-export function Section({
-  children,
-  variant = "default",
-  className,
-}: SectionProps) {
+export function Section({ children, variant = "default", className }: SectionProps) {
   return (
     <section
       className={cn(
         "relative py-24",
         variant === "muted" && "bg-muted",
-        variant === "inverted" &&
-          "bg-foreground text-background [&_*]:border-background/20",
-        className,
+        variant === "inverted" && "bg-foreground text-background [&_*]:border-background/20",
+        className
       )}
     >
       {children}

@@ -27,28 +27,23 @@ import { motion } from "motion/react";
 import { MessageCircle, X } from "lucide-react";
 import { ChatCallout } from "./chat-callout"; // Lottie "How can I help?" bubble
 
-export const ChatButton = memo(
-  ({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) => (
-    <div className="fixed bottom-6 right-6 z-50 flex items-end gap-3">
-      <ChatCallout isOpen={isOpen} />
-      <motion.button
-        onClick={onClick}
-        className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
-        whileTap={{ scale: 0.95 }}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      >
-        <motion.div
-          animate={{ rotate: isOpen ? 90 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
-        </motion.div>
-      </motion.button>
-    </div>
-  ),
-);
+export const ChatButton = memo(({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) => (
+  <div className="fixed bottom-6 right-6 z-50 flex items-end gap-3">
+    <ChatCallout isOpen={isOpen} />
+    <motion.button
+      onClick={onClick}
+      className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
+      whileTap={{ scale: 0.95 }}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+    >
+      <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
+        {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
+      </motion.div>
+    </motion.button>
+  </div>
+));
 ```
 
 ## ChatContainer
@@ -156,10 +151,7 @@ Feature flag in host app:
 // Host app layout.tsx
 {
   process.env.NEXT_PUBLIC_CHAT_URL && (
-    <Script
-      src={`${process.env.NEXT_PUBLIC_CHAT_URL}/widget.js`}
-      strategy="lazyOnload"
-    />
+    <Script src={`${process.env.NEXT_PUBLIC_CHAT_URL}/widget.js`} strategy="lazyOnload" />
   );
 }
 ```

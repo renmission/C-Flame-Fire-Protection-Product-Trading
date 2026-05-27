@@ -97,9 +97,9 @@ import { Persona } from "@repo/elements/persona";
 import { useState } from "react";
 
 export default function App() {
-  const [state, setState] = useState<
-    "idle" | "listening" | "thinking" | "speaking" | "asleep"
-  >("idle");
+  const [state, setState] = useState<"idle" | "listening" | "thinking" | "speaking" | "asleep">(
+    "idle"
+  );
 
   const startListening = () => setState("listening");
   const startThinking = () => setState("thinking");

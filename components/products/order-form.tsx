@@ -121,7 +121,8 @@ export function OrderForm({ user }: { user: UserInfo }) {
   const addProduct = (product: PublicProduct) => {
     setOrderItems((prev) => {
       const exists = prev.find((i) => i.product.id === product.id);
-      if (exists) return prev.map((i) => (i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i));
+      if (exists)
+        return prev.map((i) => (i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i));
       return [...prev, { product, qty: 1 }];
     });
     setSearchQuery("");
@@ -138,10 +139,7 @@ export function OrderForm({ user }: { user: UserInfo }) {
     setOrderItems((prev) => prev.filter((i) => i.product.id !== id));
   };
 
-  const total = orderItems.reduce(
-    (sum, item) => sum + (item.product.listPrice ?? 0) * item.qty,
-    0
-  );
+  const total = orderItems.reduce((sum, item) => sum + (item.product.listPrice ?? 0) * item.qty, 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,10 +154,34 @@ export function OrderForm({ user }: { user: UserInfo }) {
       return;
     }
     setIsSubmitting(true);
-    // Simulate submission delay (replace with real API call when order endpoint is ready)
-    await new Promise((r) => setTimeout(r, 800));
-    setIsSubmitting(false);
-    setSubmitted(true);
+    try {
+      const res = await fetch("/api/customer/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: customerName.trim(),
+          contact: contact.trim(),
+          address: address.trim(),
+          paymentMode,
+          gcashRef: gcashRef.trim() || undefined,
+          items: orderItems.map((i) => ({
+            productId: i.product.id,
+            quantity: i.qty,
+            unitPrice: i.product.listPrice ?? 0,
+          })),
+        }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        setSubmitError(json.error ?? "Failed to place order. Please try again.");
+        return;
+      }
+      setSubmitted(true);
+    } catch {
+      setSubmitError("Network error. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -183,7 +205,8 @@ export function OrderForm({ user }: { user: UserInfo }) {
                   </div>
                 ))}
                 <p className="text-xs text-muted-foreground pt-1">
-                  Reference No.: <span className="font-mono font-semibold text-foreground">{gcashRef}</span>
+                  Reference No.:{" "}
+                  <span className="font-mono font-semibold text-foreground">{gcashRef}</span>
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Send your GCash payment screenshot to our contact number to confirm your order.
@@ -205,18 +228,10 @@ export function OrderForm({ user }: { user: UserInfo }) {
       <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link href="/">
-            <Image
-              src="/logo.png"
-              alt="C'FLAME"
-              width={160}
-              height={40}
-              className="h-10 w-auto"
-            />
+            <Image src="/logo.png" alt="C'FLAME" width={160} height={40} className="h-10 w-auto" />
           </Link>
           <div className="flex items-center gap-3">
-            <span className="hidden sm:block text-sm text-muted-foreground">
-              {user.email}
-            </span>
+            <span className="hidden sm:block text-sm text-muted-foreground">{user.email}</span>
             <Button
               variant="ghost"
               size="sm"
@@ -245,234 +260,249 @@ export function OrderForm({ user }: { user: UserInfo }) {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
           {/* Order Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Customer Details */}
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base">Customer Details</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="customerName">Customer Name *</Label>
-                <Input
-                  id="customerName"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Juan Dela Cruz"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="contact">Contact Number *</Label>
-                <Input
-                  id="contact"
-                  value={contact}
-                  onChange={(e) => setContact(e.target.value)}
-                  placeholder="09XXXXXXXXX"
-                  required
-                  type="tel"
-                />
-              </div>
-              <div className="grid gap-2 sm:col-span-2">
-                <Label htmlFor="address">Delivery Address *</Label>
-                <textarea
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="House no., Street, Barangay, City, Province"
-                  required
-                  rows={3}
-                  className={cn(
-                    "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
-                    "ring-offset-background placeholder:text-muted-foreground",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "resize-none"
-                  )}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="paymentMode">Mode of Payment *</Label>
-                <select
-                  id="paymentMode"
-                  value={paymentMode}
-                  onChange={(e) => setPaymentMode(e.target.value as PaymentMode)}
-                  className={cn(
-                    "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
-                    "ring-offset-background focus-visible:outline-none focus-visible:ring-2",
-                    "focus-visible:ring-ring focus-visible:ring-offset-2"
-                  )}
-                >
-                  {PAYMENT_MODES.map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
-                {paymentMode === "GCash" && (
-                  <>
-                    <div className="rounded-md border border-border bg-muted/50 p-3 text-xs space-y-1">
-                      <p className="font-medium text-foreground">GCash Numbers:</p>
-                      {GCASH_NUMBERS.map((g) => (
-                        <p key={g.number} className="text-muted-foreground">
-                          <span className="font-mono font-semibold text-foreground">{g.number}</span>
-                          {" — "}{g.name}
-                        </p>
-                      ))}
-                    </div>
-                    <div className="grid gap-2 mt-2">
-                      <Label htmlFor="gcashRef">GCash Reference Number *</Label>
-                      <Input
-                        id="gcashRef"
-                        value={gcashRef}
-                        onChange={(e) => setGcashRef(e.target.value)}
-                        placeholder="e.g. 1234567890"
-                        maxLength={30}
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Product Search */}
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base">Select Products</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Search Input */}
-              <div className="relative" ref={searchRef}>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            {/* Customer Details */}
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base">Customer Details</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="customerName">Customer Name *</Label>
                   <Input
-                    placeholder="Search product by name or SKU..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
+                    id="customerName"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Juan Dela Cruz"
+                    required
                   />
                 </div>
-                {/* Dropdown */}
-                {showDropdown && (
-                  <div className="absolute z-30 mt-1 w-full rounded-md border border-border bg-background shadow-lg max-h-60 overflow-y-auto">
-                    {isSearching && (
-                      <div className="px-4 py-3 text-sm text-muted-foreground">Searching...</div>
+                <div className="grid gap-2">
+                  <Label htmlFor="contact">Contact Number *</Label>
+                  <Input
+                    id="contact"
+                    value={contact}
+                    onChange={(e) => setContact(e.target.value)}
+                    placeholder="09XXXXXXXXX"
+                    required
+                    type="tel"
+                  />
+                </div>
+                <div className="grid gap-2 sm:col-span-2">
+                  <Label htmlFor="address">Delivery Address *</Label>
+                  <textarea
+                    id="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="House no., Street, Barangay, City, Province"
+                    required
+                    rows={3}
+                    className={cn(
+                      "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+                      "ring-offset-background placeholder:text-muted-foreground",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                      "resize-none"
                     )}
-                    {!isSearching && searchResults.length === 0 && (
-                      <div className="px-4 py-3 text-sm text-muted-foreground">No products found.</div>
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="paymentMode">Mode of Payment *</Label>
+                  <select
+                    id="paymentMode"
+                    value={paymentMode}
+                    onChange={(e) => setPaymentMode(e.target.value as PaymentMode)}
+                    className={cn(
+                      "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+                      "ring-offset-background focus-visible:outline-none focus-visible:ring-2",
+                      "focus-visible:ring-ring focus-visible:ring-offset-2"
                     )}
-                    {!isSearching &&
-                      searchResults.map((product) => (
-                        <button
-                          key={product.id}
-                          type="button"
-                          onClick={() => addProduct(product)}
-                          className="w-full flex items-center justify-between px-4 py-3 text-sm hover:bg-muted transition-colors text-left"
-                        >
-                          <div>
-                            <p className="font-medium">{product.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              SKU: {product.sku} · {product.unit}
-                              {product.category ? ` · ${product.category}` : ""}
-                            </p>
-                          </div>
-                          <div className="text-right ml-4 shrink-0">
-                            <p className="font-semibold text-primary">
-                              {product.listPrice != null
-                                ? formatCurrency(product.listPrice)
-                                : "—"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">{product.quantity} in stock</p>
-                          </div>
-                        </button>
-                      ))}
+                  >
+                    {PAYMENT_MODES.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                  {paymentMode === "GCash" && (
+                    <>
+                      <div className="rounded-md border border-border bg-muted/50 p-3 text-xs space-y-1">
+                        <p className="font-medium text-foreground">GCash Numbers:</p>
+                        {GCASH_NUMBERS.map((g) => (
+                          <p key={g.number} className="text-muted-foreground">
+                            <span className="font-mono font-semibold text-foreground">
+                              {g.number}
+                            </span>
+                            {" — "}
+                            {g.name}
+                          </p>
+                        ))}
+                      </div>
+                      <div className="grid gap-2 mt-2">
+                        <Label htmlFor="gcashRef">GCash Reference Number *</Label>
+                        <Input
+                          id="gcashRef"
+                          value={gcashRef}
+                          onChange={(e) => setGcashRef(e.target.value)}
+                          placeholder="e.g. 1234567890"
+                          maxLength={30}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Product Search */}
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base">Select Products</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Search Input */}
+                <div className="relative" ref={searchRef}>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <Input
+                      placeholder="Search product by name or SKU..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  {/* Dropdown */}
+                  {showDropdown && (
+                    <div className="absolute z-30 mt-1 w-full rounded-md border border-border bg-background shadow-lg max-h-60 overflow-y-auto">
+                      {isSearching && (
+                        <div className="px-4 py-3 text-sm text-muted-foreground">Searching...</div>
+                      )}
+                      {!isSearching && searchResults.length === 0 && (
+                        <div className="px-4 py-3 text-sm text-muted-foreground">
+                          No products found.
+                        </div>
+                      )}
+                      {!isSearching &&
+                        searchResults.map((product) => (
+                          <button
+                            key={product.id}
+                            type="button"
+                            onClick={() => addProduct(product)}
+                            className="w-full flex items-center justify-between px-4 py-3 text-sm hover:bg-muted transition-colors text-left"
+                          >
+                            <div>
+                              <p className="font-medium">{product.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                SKU: {product.sku} · {product.unit}
+                                {product.category ? ` · ${product.category}` : ""}
+                              </p>
+                            </div>
+                            <div className="text-right ml-4 shrink-0">
+                              <p className="font-semibold text-primary">
+                                {product.listPrice != null
+                                  ? formatCurrency(product.listPrice)
+                                  : "—"}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {product.quantity} in stock
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Selected Products Table */}
+                {orderItems.length > 0 ? (
+                  <div className="rounded-md border border-border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Product</TableHead>
+                          <TableHead className="w-20 text-center">Unit</TableHead>
+                          <TableHead className="w-24 text-center">Qty</TableHead>
+                          <TableHead className="w-28 text-right">Unit Price</TableHead>
+                          <TableHead className="w-28 text-right">Subtotal</TableHead>
+                          <TableHead className="w-12" />
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {orderItems.map((item) => (
+                          <TableRow key={item.product.id}>
+                            <TableCell>
+                              <p className="font-medium text-sm">{item.product.name}</p>
+                              <p className="text-xs text-muted-foreground">{item.product.sku}</p>
+                            </TableCell>
+                            <TableCell className="text-center text-sm text-muted-foreground">
+                              {item.product.unit}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Input
+                                type="number"
+                                min={1}
+                                value={item.qty}
+                                onChange={(e) => updateQty(item.product.id, e.target.value)}
+                                className="w-16 text-center h-8 mx-auto"
+                              />
+                            </TableCell>
+                            <TableCell className="text-right text-sm">
+                              {item.product.listPrice != null ? (
+                                formatCurrency(item.product.listPrice)
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right text-sm font-medium">
+                              {item.product.listPrice != null ? (
+                                formatCurrency(item.product.listPrice * item.qty)
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <button
+                                type="button"
+                                onClick={() => removeItem(item.product.id)}
+                                className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    {/* Total Row */}
+                    <div className="flex items-center justify-end gap-4 border-t border-border bg-muted/30 px-4 py-3">
+                      <span className="text-sm font-medium text-muted-foreground">Order Total</span>
+                      <span className="text-lg font-bold text-primary">
+                        {formatCurrency(total)}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
+                    No products added yet. Search above to add items to your order.
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {submitError && (
+              <div className="rounded-md bg-destructive/15 border border-destructive/50 p-3 text-sm text-destructive">
+                {submitError}
               </div>
+            )}
 
-              {/* Selected Products Table */}
-              {orderItems.length > 0 ? (
-                <div className="rounded-md border border-border overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Product</TableHead>
-                        <TableHead className="w-20 text-center">Unit</TableHead>
-                        <TableHead className="w-24 text-center">Qty</TableHead>
-                        <TableHead className="w-28 text-right">Unit Price</TableHead>
-                        <TableHead className="w-28 text-right">Subtotal</TableHead>
-                        <TableHead className="w-12" />
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {orderItems.map((item) => (
-                        <TableRow key={item.product.id}>
-                          <TableCell>
-                            <p className="font-medium text-sm">{item.product.name}</p>
-                            <p className="text-xs text-muted-foreground">{item.product.sku}</p>
-                          </TableCell>
-                          <TableCell className="text-center text-sm text-muted-foreground">
-                            {item.product.unit}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Input
-                              type="number"
-                              min={1}
-                              value={item.qty}
-                              onChange={(e) => updateQty(item.product.id, e.target.value)}
-                              className="w-16 text-center h-8 mx-auto"
-                            />
-                          </TableCell>
-                          <TableCell className="text-right text-sm">
-                            {item.product.listPrice != null
-                              ? formatCurrency(item.product.listPrice)
-                              : <span className="text-muted-foreground">—</span>}
-                          </TableCell>
-                          <TableCell className="text-right text-sm font-medium">
-                            {item.product.listPrice != null
-                              ? formatCurrency(item.product.listPrice * item.qty)
-                              : <span className="text-muted-foreground">—</span>}
-                          </TableCell>
-                          <TableCell>
-                            <button
-                              type="button"
-                              onClick={() => removeItem(item.product.id)}
-                              className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  {/* Total Row */}
-                  <div className="flex items-center justify-end gap-4 border-t border-border bg-muted/30 px-4 py-3">
-                    <span className="text-sm font-medium text-muted-foreground">Order Total</span>
-                    <span className="text-lg font-bold text-primary">{formatCurrency(total)}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-md border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
-                  No products added yet. Search above to add items to your order.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {submitError && (
-            <div className="rounded-md bg-destructive/15 border border-destructive/50 p-3 text-sm text-destructive">
-              {submitError}
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                size="lg"
+                disabled={isSubmitting || orderItems.length === 0}
+                className="px-10"
+              >
+                {isSubmitting ? "Placing order..." : "Place Order"}
+              </Button>
             </div>
-          )}
-
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              size="lg"
-              disabled={isSubmitting || orderItems.length === 0}
-              className="px-10"
-            >
-              {isSubmitting ? "Placing order..." : "Place Order"}
-            </Button>
-          </div>
           </form>
 
           {/* Ordering Instructions — sticky right column */}
@@ -490,14 +520,19 @@ export function OrderForm({ user }: { user: UserInfo }) {
                 </p>
                 <ul className="space-y-1">
                   {ORDERING_INSTRUCTIONS.map((instruction) => (
-                    <li key={instruction} className="text-sm text-amber-800/80 dark:text-amber-400/80 flex gap-2">
+                    <li
+                      key={instruction}
+                      className="text-sm text-amber-800/80 dark:text-amber-400/80 flex gap-2"
+                    >
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
                       {instruction}
                     </li>
                   ))}
                 </ul>
                 <div className="pt-2 border-t border-amber-200 dark:border-amber-900">
-                  <p className="text-xs font-semibold text-amber-800 dark:text-amber-400 mb-1">GCash Payment Numbers:</p>
+                  <p className="text-xs font-semibold text-amber-800 dark:text-amber-400 mb-1">
+                    GCash Payment Numbers:
+                  </p>
                   {GCASH_NUMBERS.map((g) => (
                     <p key={g.number} className="text-sm text-amber-800/80 dark:text-amber-400/80">
                       <span className="font-mono font-semibold">{g.number}</span>

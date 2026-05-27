@@ -59,10 +59,7 @@ import {
     <MessageResponse>{text}</MessageResponse>
   </MessageContent>
   <MessageActions>
-    <MessageAction
-      label="Copy"
-      onClick={() => navigator.clipboard.writeText(text)}
-    >
+    <MessageAction label="Copy" onClick={() => navigator.clipboard.writeText(text)}>
       <CopyIcon className="size-3" />
     </MessageAction>
     <MessageAction label="Retry" onClick={() => regenerate()}>
@@ -137,10 +134,7 @@ const handleSubmit = (message: PromptInputMessage) => {
 
 <PromptInput onSubmit={handleSubmit}>
   <PromptInputBody>
-    <PromptInputTextarea
-      value={input}
-      onChange={(e) => setInput(e.target.value)}
-    />
+    <PromptInputTextarea value={input} onChange={(e) => setInput(e.target.value)} />
   </PromptInputBody>
   <PromptInputFooter>
     <PromptInputSubmit status={status} />
@@ -271,11 +265,7 @@ type PromptInputMessage = {
 Collapsible thinking/reasoning display with auto-collapse.
 
 ```tsx
-import {
-  Reasoning,
-  ReasoningTrigger,
-  ReasoningContent,
-} from "@/components/ai-elements/reasoning";
+import { Reasoning, ReasoningTrigger, ReasoningContent } from "@/components/ai-elements/reasoning";
 
 <Reasoning
   isStreaming={status === "streaming"}
@@ -312,12 +302,7 @@ import {
 Collapsible citation/reference display.
 
 ```tsx
-import {
-  Sources,
-  SourcesTrigger,
-  SourcesContent,
-  Source,
-} from "@/components/ai-elements/sources";
+import { Sources, SourcesTrigger, SourcesContent, Source } from "@/components/ai-elements/sources";
 
 const sourceUrls = message.parts.filter((p) => p.type === "source-url");
 
@@ -403,16 +388,8 @@ import {
       description="Found 5 results"
       status="complete"
     />
-    <ChainOfThoughtStep
-      icon={BrainIcon}
-      label="Analyzing results"
-      status="active"
-    />
-    <ChainOfThoughtStep
-      icon={PenIcon}
-      label="Writing response"
-      status="pending"
-    />
+    <ChainOfThoughtStep icon={BrainIcon} label="Analyzing results" status="active" />
+    <ChainOfThoughtStep icon={PenIcon} label="Writing response" status="pending" />
     <ChainOfThoughtSearchResults>
       <Badge>Result 1</Badge>
       <Badge>Result 2</Badge>
@@ -600,11 +577,7 @@ import {
 <Queue>
   <QueueSection>
     <QueueSectionTrigger>
-      <QueueSectionLabel
-        count={3}
-        label="pending"
-        icon={<ClockIcon className="size-4" />}
-      />
+      <QueueSectionLabel count={3} label="pending" icon={<ClockIcon className="size-4" />} />
     </QueueSectionTrigger>
     <QueueSectionContent>
       <QueueList>

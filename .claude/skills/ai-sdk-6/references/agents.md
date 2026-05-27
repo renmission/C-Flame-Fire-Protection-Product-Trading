@@ -118,10 +118,9 @@ const budgetExceeded: StopCondition<typeof tools> = ({ steps }) => {
       inputTokens: acc.inputTokens + (step.usage?.inputTokens ?? 0),
       outputTokens: acc.outputTokens + (step.usage?.outputTokens ?? 0),
     }),
-    { inputTokens: 0, outputTokens: 0 },
+    { inputTokens: 0, outputTokens: 0 }
   );
-  const cost =
-    (totalUsage.inputTokens * 0.01 + totalUsage.outputTokens * 0.03) / 1000;
+  const cost = (totalUsage.inputTokens * 0.01 + totalUsage.outputTokens * 0.03) / 1000;
   return cost > 0.5;
 };
 ```

@@ -24,17 +24,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
 
-    const suggestions = await generateSuggestions(
-      parsed.data.question,
-      parsed.data.answer,
-    );
+    const suggestions = await generateSuggestions(parsed.data.question, parsed.data.answer);
     return NextResponse.json({ suggestions });
   } catch (error) {
     console.error("Error generating suggestions:", error);
-    return NextResponse.json(
-      { error: "Failed to generate suggestions" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to generate suggestions" }, { status: 500 });
   }
 }
 ```
@@ -50,16 +44,10 @@ import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 
 const suggestionsSchema = z.object({
-  questions: z
-    .array(z.string())
-    .max(3)
-    .describe("Follow-up questions the user might want to ask"),
+  questions: z.array(z.string()).max(3).describe("Follow-up questions the user might want to ask"),
 });
 
-export async function generateSuggestions(
-  question: string,
-  answer: string,
-): Promise<string[]> {
+export async function generateSuggestions(question: string, answer: string): Promise<string[]> {
   try {
     const { output } = await generateText({
       model: openai("gpt-4o-mini"),

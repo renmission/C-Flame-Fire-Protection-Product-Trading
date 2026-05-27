@@ -79,10 +79,7 @@ const ImageDemo = () => {
           {isLoading && <Spinner />}
         </div>
 
-        <Input
-          onSubmit={handleSubmit}
-          className="mt-4 w-full max-w-2xl mx-auto relative"
-        >
+        <Input onSubmit={handleSubmit} className="mt-4 w-full max-w-2xl mx-auto relative">
           <PromptInputTextarea
             value={prompt}
             placeholder="Describe the image you want to generate..."

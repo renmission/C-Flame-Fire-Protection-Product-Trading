@@ -29,7 +29,10 @@ export function LandingNav() {
             className="h-24 w-auto"
           />
           <div className="hidden lg:flex flex-col leading-tight">
-            <span className="text-3xl font-bold uppercase tracking-wide text-foreground" style={{ fontFamily: "var(--font-oswald)" }}>
+            <span
+              className="text-3xl font-bold uppercase tracking-wide text-foreground"
+              style={{ fontFamily: "var(--font-oswald)" }}
+            >
               C&apos;FLAME
             </span>
             <span className="text-[0.75rem] font-medium uppercase tracking-[0.12em] text-muted-foreground">
@@ -47,8 +50,12 @@ export function LandingNav() {
             <Phone className="h-3.5 w-3.5 text-primary" />
             (+63) 0912 365 4789
           </a>
-          <Button asChild size="sm" className="rounded-none px-5 py-2 h-9 font-semibold tracking-wide text-xs uppercase">
-             <Link href="/login">Sign In</Link>
+          <Button
+            asChild
+            size="sm"
+            className="rounded-none px-5 py-2 h-9 font-semibold tracking-wide text-xs uppercase"
+          >
+            <Link href="/login">Sign In</Link>
           </Button>
         </div>
 
@@ -73,7 +80,10 @@ export function LandingNav() {
               <Phone className="h-4 w-4 text-primary" />
               (800) 450-2885
             </a>
-            <Button asChild className="w-full rounded-none uppercase tracking-wide text-xs font-semibold">
+            <Button
+              asChild
+              className="w-full rounded-none uppercase tracking-wide text-xs font-semibold"
+            >
               <Link href="/login">Sign In</Link>
             </Button>
           </div>

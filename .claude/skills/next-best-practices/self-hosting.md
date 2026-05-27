@@ -82,8 +82,7 @@ services:
       - NODE_ENV=production
     restart: unless-stopped
     healthcheck:
-      test:
-        ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -171,11 +170,7 @@ module.exports = class CacheHandler {
 
     // Set TTL based on revalidate option
     if (ctx?.revalidate) {
-      await redis.setex(
-        CACHE_PREFIX + key,
-        ctx.revalidate,
-        JSON.stringify(cacheData),
-      );
+      await redis.setex(CACHE_PREFIX + key, ctx.revalidate, JSON.stringify(cacheData));
     } else {
       await redis.set(CACHE_PREFIX + key, JSON.stringify(cacheData));
     }
@@ -192,11 +187,7 @@ module.exports = class CacheHandler {
 
 ```js
 // cache-handler.js
-const {
-  S3Client,
-  GetObjectCommand,
-  PutObjectCommand,
-} = require("@aws-sdk/client-s3");
+const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 const BUCKET = process.env.CACHE_BUCKET;
@@ -208,7 +199,7 @@ module.exports = class CacheHandler {
         new GetObjectCommand({
           Bucket: BUCKET,
           Key: `cache/${key}`,
-        }),
+        })
       );
       const body = await response.Body.transformToString();
       return JSON.parse(body);
@@ -228,7 +219,7 @@ module.exports = class CacheHandler {
           lastModified: Date.now(),
         }),
         ContentType: "application/json",
-      }),
+      })
     );
   }
 };

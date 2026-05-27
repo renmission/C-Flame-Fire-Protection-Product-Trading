@@ -51,10 +51,7 @@ export const CodeSandbox = ({ toolPart }: CodeSandboxProps) => {
 
   return (
     <Sandbox>
-      <SandboxHeader
-        state={toolPart.state}
-        title={toolPart.input?.filename ?? "code.tsx"}
-      />
+      <SandboxHeader state={toolPart.state} title={toolPart.input?.filename ?? "code.tsx"} />
       <SandboxContent>
         <SandboxTabs defaultValue="code">
           <SandboxTabsBar>

@@ -116,9 +116,7 @@ export const ragMiddleware: LanguageModelV3Middleware = {
     if (!messageText) return params;
 
     const sources = await vectorSearch(messageText);
-    const contextInstruction = sources
-      .map((chunk) => JSON.stringify(chunk))
-      .join("\n");
+    const contextInstruction = sources.map((chunk) => JSON.stringify(chunk)).join("\n");
 
     return addToLastUserMessage({ params, text: contextInstruction });
   },

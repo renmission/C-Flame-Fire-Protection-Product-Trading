@@ -22,12 +22,7 @@ Add the following component to your frontend:
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import {
-  Source,
-  Sources,
-  SourcesContent,
-  SourcesTrigger,
-} from "@/components/ai-elements/sources";
+import { Source, Sources, SourcesContent, SourcesTrigger } from "@/components/ai-elements/sources";
 import {
   Input,
   PromptInputTextarea,
@@ -38,11 +33,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { useState } from "react";
 import { DefaultChatTransport } from "ai";
 
@@ -69,9 +60,7 @@ const SourceDemo = () => {
           <Conversation>
             <ConversationContent>
               {messages.map((message) => {
-                const sourceUrls = message.parts.filter(
-                  (p) => p.type === "source-url",
-                );
+                const sourceUrls = message.parts.filter((p) => p.type === "source-url");
 
                 return (
                   <div key={message.id}>
@@ -96,7 +85,7 @@ const SourceDemo = () => {
                             <MessageResponse key={`${message.id}-${i}`}>
                               {part.text}
                             </MessageResponse>
-                          ) : null,
+                          ) : null
                         )}
                       </MessageContent>
                     </Message>
@@ -108,10 +97,7 @@ const SourceDemo = () => {
           </Conversation>
         </div>
 
-        <Input
-          onSubmit={handleSubmit}
-          className="mt-4 w-full max-w-2xl mx-auto relative"
-        >
+        <Input onSubmit={handleSubmit} className="mt-4 w-full max-w-2xl mx-auto relative">
           <PromptInputTextarea
             value={input}
             placeholder="Ask a question and search the..."

@@ -136,7 +136,10 @@ export default function RegisterPage() {
               </Button>
               <p className="text-center text-sm text-muted-foreground">
                 Already have an account?{" "}
-                <Link href="/login?callbackUrl=/products" className="text-primary underline-offset-4 hover:underline">
+                <Link
+                  href="/login?callbackUrl=/products"
+                  className="text-primary underline-offset-4 hover:underline"
+                >
                   Sign in
                 </Link>
               </p>

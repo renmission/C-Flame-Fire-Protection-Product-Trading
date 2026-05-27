@@ -122,11 +122,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Card({ className, variant = "default", ...props }: CardProps) {
   return (
     <div
-      className={cn(
-        "rounded-lg p-4",
-        variant === "outline" && "border",
-        className,
-      )}
+      className={cn("rounded-lg p-4", variant === "outline" && "border", className)}
       {...props}
     />
   );
@@ -378,10 +374,7 @@ function SubmitButton({ action }: { action: () => Promise<void> }) {
   const [isPending, startTransition] = useTransition();
 
   return (
-    <button
-      onClick={() => startTransition(() => action())}
-      disabled={isPending}
-    >
+    <button onClick={() => startTransition(() => action())} disabled={isPending}>
       {isPending ? "Saving..." : "Save"}
     </button>
   );

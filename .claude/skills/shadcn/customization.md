@@ -112,8 +112,7 @@ module.exports = {
     extend: {
       colors: {
         warning: "oklch(var(--warning) / <alpha-value>)",
-        "warning-foreground":
-          "oklch(var(--warning-foreground) / <alpha-value>)",
+        "warning-foreground": "oklch(var(--warning-foreground) / <alpha-value>)",
       },
     },
   },

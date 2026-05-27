@@ -261,10 +261,7 @@ Output from Benchmark mode. Located at `benchmarks/<timestamp>/benchmark.json`.
         "errors": 0
       },
       "expectations": [{ "text": "...", "passed": true, "evidence": "..." }],
-      "notes": [
-        "Used 2023 data, may be stale",
-        "Fell back to text overlay for non-fillable fields"
-      ]
+      "notes": ["Used 2023 data, may be stale", "Fell back to text overlay for non-fillable fields"]
     }
   ],
 
@@ -365,21 +362,13 @@ Output from blind comparator. Located at `<grading-dir>/comparison-N.json`.
   "output_quality": {
     "A": {
       "score": 9,
-      "strengths": [
-        "Complete solution",
-        "Well-formatted",
-        "All fields present"
-      ],
+      "strengths": ["Complete solution", "Well-formatted", "All fields present"],
       "weaknesses": ["Minor style inconsistency in header"]
     },
     "B": {
       "score": 5,
       "strengths": ["Readable output", "Correct basic structure"],
-      "weaknesses": [
-        "Missing date field",
-        "Formatting inconsistencies",
-        "Partial data extraction"
-      ]
+      "weaknesses": ["Missing date field", "Formatting inconsistencies", "Partial data extraction"]
     }
   },
   "expectation_results": {

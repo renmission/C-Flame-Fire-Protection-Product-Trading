@@ -492,7 +492,7 @@ const schema = valibotSchema(
   v.object({
     name: v.string(),
     age: v.number(),
-  }),
+  })
 );
 ```
 

@@ -23,28 +23,28 @@ Version 0.1.0 — actively developed.
 
 ## Key Directories
 
-| Path                      | Purpose                                                       |
-| ------------------------- | ------------------------------------------------------------- |
-| `app/(auth)/`             | Login/auth routes (unprotected)                               |
-| `app/dashboard/`          | Protected dashboard pages — one sub-folder per module         |
-| `app/api/`                | 70+ REST API routes organized by resource                     |
-| `components/ui/`          | shadcn/ui primitives (button, card, table, input…)            |
-| `components/dashboard/`   | Dashboard shell, sidebar, nav, role-specific dashboards       |
-| `components/{module}/`    | Feature components: inventory, payroll, pos, users, delivery… |
-| `lib/db/schema.ts`        | Drizzle ORM schema — single source of truth for all tables    |
+| Path                      | Purpose                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------- |
+| `app/(auth)/`             | Login/auth routes (unprotected)                                                         |
+| `app/dashboard/`          | Protected dashboard pages — one sub-folder per module                                   |
+| `app/api/`                | 70+ REST API routes organized by resource                                               |
+| `components/ui/`          | shadcn/ui primitives (button, card, table, input…)                                      |
+| `components/dashboard/`   | Dashboard shell, sidebar, nav, role-specific dashboards                                 |
+| `components/{module}/`    | Feature components: inventory, payroll, pos, users, delivery…                           |
+| `lib/db/schema.ts`        | Drizzle ORM schema — single source of truth for all tables                              |
 | `lib/db/index.ts`         | DB client + re-exports all schema symbols (`import { db, users, ... } from "@/lib/db"`) |
-| `lib/auth.ts`             | NextAuth config + JWT callbacks (roles baked into JWT at sign-in) |
-| `lib/api-auth.ts`         | `getSessionOr401()` + `requirePermission()` — used at top of every API route |
-| `lib/auth/permissions.ts` | RBAC: `PERMISSIONS`, `ROLES`, `ROLE_PERMISSIONS`, `can()`, nav config |
-| `lib/{module}-api.ts`     | Client-side `fetch` wrappers — call these from components/hooks |
-| `lib/{module}.ts`         | Server-side domain logic shared across API routes (e.g. `applyStockMovement`) |
-| `lib/errors.ts`           | `AppError`, `apiErrorResponse()`, `withRouteErrorHandling()`, `parseApiResponse()` |
-| `schemas/`                | Zod schemas — one file per module, types inferred with `z.infer<>` |
-| `stores/ui-store.ts`      | Zustand UI store (sidebar, modals, filters)                   |
-| `types/next-auth.d.ts`    | NextAuth session/JWT type extensions                          |
-| `middleware.ts`           | Route protection + auth redirects (dashboard requires auth)   |
-| `drizzle/`                | ORM migration files                                           |
-| `scripts/`                | DB seeding and backfill scripts (run with `tsx`)              |
+| `lib/auth.ts`             | NextAuth config + JWT callbacks (roles baked into JWT at sign-in)                       |
+| `lib/api-auth.ts`         | `getSessionOr401()` + `requirePermission()` — used at top of every API route            |
+| `lib/auth/permissions.ts` | RBAC: `PERMISSIONS`, `ROLES`, `ROLE_PERMISSIONS`, `can()`, nav config                   |
+| `lib/{module}-api.ts`     | Client-side `fetch` wrappers — call these from components/hooks                         |
+| `lib/{module}.ts`         | Server-side domain logic shared across API routes (e.g. `applyStockMovement`)           |
+| `lib/errors.ts`           | `AppError`, `apiErrorResponse()`, `withRouteErrorHandling()`, `parseApiResponse()`      |
+| `schemas/`                | Zod schemas — one file per module, types inferred with `z.infer<>`                      |
+| `stores/ui-store.ts`      | Zustand UI store (sidebar, modals, filters)                                             |
+| `types/next-auth.d.ts`    | NextAuth session/JWT type extensions                                                    |
+| `middleware.ts`           | Route protection + auth redirects (dashboard requires auth)                             |
+| `drizzle/`                | ORM migration files                                                                     |
+| `scripts/`                | DB seeding and backfill scripts (run with `tsx`)                                        |
 
 ## Essential Commands
 

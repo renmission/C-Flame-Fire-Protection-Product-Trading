@@ -30,17 +30,9 @@ app/
 ```tsx
 // app/(dashboard)/layout.tsx
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarRail,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, SidebarRail } from "@/components/ui/sidebar";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />

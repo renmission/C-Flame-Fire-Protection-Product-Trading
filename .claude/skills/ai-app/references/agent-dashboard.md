@@ -91,11 +91,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import {
   PromptInput,
   PromptInputBody,
@@ -111,11 +107,7 @@ import {
   ToolInput,
   ToolOutput,
 } from "@/components/ai-elements/tool";
-import {
-  Reasoning,
-  ReasoningTrigger,
-  ReasoningContent,
-} from "@/components/ai-elements/reasoning";
+import { Reasoning, ReasoningTrigger, ReasoningContent } from "@/components/ai-elements/reasoning";
 import { Loader } from "@/components/ai-elements/loader";
 import { useState } from "react";
 
@@ -167,10 +159,7 @@ export default function AgentDashboard() {
                       return (
                         <Reasoning
                           key={i}
-                          isStreaming={
-                            status === "streaming" &&
-                            message.id === messages.at(-1)?.id
-                          }
+                          isStreaming={status === "streaming" && message.id === messages.at(-1)?.id}
                         >
                           <ReasoningTrigger />
                           <ReasoningContent>{part.text}</ReasoningContent>
@@ -182,17 +171,10 @@ export default function AgentDashboard() {
                       if (part.type.startsWith("tool-")) {
                         return (
                           <Tool key={i}>
-                            <ToolHeader
-                              title={part.toolName}
-                              type={part.type}
-                              state={part.state}
-                            />
+                            <ToolHeader title={part.toolName} type={part.type} state={part.state} />
                             <ToolContent>
                               <ToolInput input={part.input} />
-                              <ToolOutput
-                                output={part.output}
-                                errorText={part.errorText}
-                              />
+                              <ToolOutput output={part.output} errorText={part.errorText} />
                             </ToolContent>
                           </Tool>
                         );
@@ -323,9 +305,7 @@ export async function POST(request: Request) {
 
 ```tsx
 // Add to dashboard
-const [agentType, setAgentType] = useState<"research" | "code" | "writing">(
-  "research",
-);
+const [agentType, setAgentType] = useState<"research" | "code" | "writing">("research");
 
 // In handleSubmit:
 sendMessage({ text: message.text }, { body: { agentType } });
@@ -338,7 +318,7 @@ sendMessage({ text: message.text }, { body: { agentType } });
       onClick={() => setAgentType(type as any)}
       className={cn(
         "px-3 py-1 rounded-full text-sm",
-        agentType === type ? "bg-primary text-primary-foreground" : "bg-muted",
+        agentType === type ? "bg-primary text-primary-foreground" : "bg-muted"
       )}
     >
       {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -365,8 +345,7 @@ import { z } from "zod";
 
 export const adminAgent = new ToolLoopAgent({
   model: anthropic("claude-sonnet-4-6"),
-  instructions:
-    "You are an admin assistant with access to sensitive operations.",
+  instructions: "You are an admin assistant with access to sensitive operations.",
   tools: {
     // Tool requiring approval - NO execute function
     deleteFile: tool({
@@ -419,9 +398,7 @@ if (part.type === "tool-invocation" && part.state === "input-available") {
         Tool <code>{part.toolName}</code> requires approval
       </ConfirmationTitle>
       <ConfirmationRequest>
-        <p className="text-sm text-muted-foreground">
-          Input: {JSON.stringify(part.input)}
-        </p>
+        <p className="text-sm text-muted-foreground">Input: {JSON.stringify(part.input)}</p>
         <ConfirmationActions>
           <ConfirmationAction
             variant="outline"

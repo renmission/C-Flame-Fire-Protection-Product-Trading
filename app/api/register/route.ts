@@ -16,10 +16,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) {
-      return Response.json(
-        { error: "Invalid input. Please check your details." },
-        { status: 400 }
-      );
+      return Response.json({ error: "Invalid input. Please check your details." }, { status: 400 });
     }
 
     const { name, email, password } = parsed.data;

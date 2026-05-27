@@ -117,9 +117,7 @@ export function CreatePostForm() {
     >
       <input name="title" required />
       <textarea name="content" required />
-      <button disabled={isPending}>
-        {isPending ? "Creating..." : "Create Post"}
-      </button>
+      <button disabled={isPending}>{isPending ? "Creating..." : "Create Post"}</button>
     </form>
   );
 }
@@ -416,11 +414,7 @@ async function InventoryStatus({ productId }: { productId: string }) {
 }
 
 // Page composition
-export default async function ProductPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   return (
@@ -517,13 +511,7 @@ import { Suspense } from "react";
 import { cacheLife, cacheTag } from "next/cache";
 
 // Product details - uses both params
-async function ProductDetails({
-  category,
-  slug,
-}: {
-  category: string;
-  slug: string;
-}) {
+async function ProductDetails({ category, slug }: { category: string; slug: string }) {
   "use cache";
   cacheTag("products", `product-${slug}`);
   cacheLife("hours");
@@ -869,11 +857,7 @@ async function CachedPageShell({
 }
 
 // Usage: cached shell wraps dynamic content
-export default function CategoryPage({
-  params,
-}: {
-  params: Promise<{ category: string }>;
-}) {
+export default function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = React.use(params);
 
   return (
@@ -919,11 +903,7 @@ function AddToCartButton({
   product: Product;
   onAdd: (id: string) => Promise<void>;
 }) {
-  return (
-    <button onClick={() => onAdd(product.id)}>
-      Add {product.name} to Cart
-    </button>
-  );
+  return <button onClick={() => onAdd(product.id)}>Add {product.name} to Cart</button>;
 }
 ```
 

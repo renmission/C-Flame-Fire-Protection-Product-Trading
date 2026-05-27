@@ -33,9 +33,7 @@ async function UsersPage() {
   const users = await db.user.findMany();
 
   // Or fetch from external API
-  const posts = await fetch("https://api.example.com/posts").then((r) =>
-    r.json(),
-  );
+  const posts = await fetch("https://api.example.com/posts").then((r) => r.json());
 
   return (
     <ul>
@@ -160,11 +158,7 @@ async function Dashboard() {
 ```tsx
 // Good: Parallel fetching
 async function Dashboard() {
-  const [user, posts, comments] = await Promise.all([
-    getUser(),
-    getPosts(),
-    getComments(),
-  ]);
+  const [user, posts, comments] = await Promise.all([getUser(), getPosts(), getComments()]);
 
   return <div>...</div>;
 }

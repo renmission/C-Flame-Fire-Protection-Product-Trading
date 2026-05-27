@@ -68,10 +68,9 @@ if (part.type === "tool-searchServices") {
       errorPrefix: "Error searching services",
       isEmpty: (o) => o.services.length === 0,
       render: (o) => <ServiceList services={o.services} total={o.total} />,
-      collapsibleLabel: (o) =>
-        `${o.total} service${o.total !== 1 ? "s" : ""} found`,
+      collapsibleLabel: (o) => `${o.total} service${o.total !== 1 ? "s" : ""} found`,
     },
-    index,
+    index
   );
 }
 ```
@@ -101,13 +100,7 @@ const toolParts = message.parts.filter((part) => part.type.startsWith("tool-"));
 Use `collapsibleLabel` when a tool can return many items (lists, search results). Keeps the chat readable.
 
 ```tsx
-function ToolCollapsible({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
+function ToolCollapsible({ label, children }: { label: string; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <CollapsiblePrimitive.Root open={open} onOpenChange={setOpen}>
@@ -160,10 +153,7 @@ export type GetContactOutput = {
 };
 
 // Used in chat-message.tsx imports:
-import type {
-  SearchServicesOutput,
-  GetContactOutput,
-} from "@/lib/ai/tools/types";
+import type { SearchServicesOutput, GetContactOutput } from "@/lib/ai/tools/types";
 ```
 
 ## Source URL parts (web search)
@@ -172,8 +162,7 @@ Web search results come as `source-url` parts, not tool-invocation parts. Collec
 
 ```ts
 const sources = message.parts.filter(
-  (p): p is { type: "source-url"; url: string; title?: string } =>
-    p.type === "source-url",
+  (p): p is { type: "source-url"; url: string; title?: string } => p.type === "source-url"
 );
 ```
 

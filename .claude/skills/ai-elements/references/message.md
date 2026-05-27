@@ -35,10 +35,7 @@ Add the following component to your frontend:
 "use client";
 
 import { useState } from "react";
-import {
-  MessageActions,
-  MessageAction,
-} from "@/components/ai-elements/message";
+import { MessageActions, MessageAction } from "@/components/ai-elements/message";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   Conversation,
@@ -77,8 +74,7 @@ const ActionsDemo = () => {
                 {message.parts.map((part, i) => {
                   switch (part.type) {
                     case "text":
-                      const isLastMessage =
-                        messageIndex === messages.length - 1;
+                      const isLastMessage = messageIndex === messages.length - 1;
 
                       return (
                         <Fragment key={`${message.id}-${i}`}>
@@ -89,16 +85,11 @@ const ActionsDemo = () => {
                           </Message>
                           {message.role === "assistant" && isLastMessage && (
                             <MessageActions>
-                              <MessageAction
-                                onClick={() => regenerate()}
-                                label="Retry"
-                              >
+                              <MessageAction onClick={() => regenerate()} label="Retry">
                                 <RefreshCcwIcon className="size-3" />
                               </MessageAction>
                               <MessageAction
-                                onClick={() =>
-                                  navigator.clipboard.writeText(part.text)
-                                }
+                                onClick={() => navigator.clipboard.writeText(part.text)}
                                 label="Copy"
                               >
                                 <CopyIcon className="size-3" />
@@ -117,10 +108,7 @@ const ActionsDemo = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <Input
-          onSubmit={handleSubmit}
-          className="mt-4 w-full max-w-2xl mx-auto relative"
-        >
+        <Input onSubmit={handleSubmit} className="mt-4 w-full max-w-2xl mx-auto relative">
           <PromptInputTextarea
             value={input}
             placeholder="Say something..."

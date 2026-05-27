@@ -246,21 +246,11 @@ import {
 
 import { useState, useCallback } from "react";
 import { Canvas } from "@/components/ai-elements/canvas";
-import {
-  Node,
-  NodeHeader,
-  NodeTitle,
-  NodeContent,
-} from "@/components/ai-elements/node";
+import { Node, NodeHeader, NodeTitle, NodeContent } from "@/components/ai-elements/node";
 import { Edge } from "@/components/ai-elements/edge";
 import { Controls } from "@/components/ai-elements/controls";
 import { Panel } from "@/components/ai-elements/panel";
-import {
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  type Connection,
-} from "@xyflow/react";
+import { useNodesState, useEdgesState, addEdge, type Connection } from "@xyflow/react";
 
 function AgentNode({ data }) {
   return (
@@ -311,7 +301,7 @@ export function WorkflowEditor() {
   const onConnect = useCallback(
     (connection: Connection) =>
       setEdges((eds) => addEdge({ ...connection, type: "animated" }, eds)),
-    [setEdges],
+    [setEdges]
   );
 
   return (

@@ -219,11 +219,7 @@ type DynamicToolUIPart = {
   type: "dynamic-tool";
   toolName: string;
   toolCallId: string;
-  state:
-    | "input-streaming"
-    | "input-available"
-    | "output-available"
-    | "output-error";
+  state: "input-streaming" | "input-available" | "output-available" | "output-error";
   input: unknown;
   output?: unknown;
   errorText?: string;
@@ -264,10 +260,7 @@ type StepStartUIPart = {
 
 ```typescript
 import { useChat } from "@ai-sdk/react";
-import {
-  DefaultChatTransport,
-  lastAssistantMessageIsCompleteWithToolCalls,
-} from "ai";
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 
 const { messages, sendMessage, addToolOutput } = useChat({
   transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -410,8 +403,7 @@ import { streamText, convertToModelMessages, UIMessage } from "ai";
 import { saveChat } from "@/lib/chat-storage";
 
 export async function POST(req: Request) {
-  const { messages, chatId }: { messages: UIMessage[]; chatId: string } =
-    await req.json();
+  const { messages, chatId }: { messages: UIMessage[]; chatId: string } = await req.json();
 
   const result = streamText({
     model: anthropic("claude-sonnet-4-6"),

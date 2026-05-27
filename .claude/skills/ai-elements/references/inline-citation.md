@@ -71,9 +71,7 @@ const CitationDemo = () => {
       </div>
 
       {isLoading && !object && (
-        <div className="text-muted-foreground">
-          Generating content with citations...
-        </div>
+        <div className="text-muted-foreground">Generating content with citations...</div>
       )}
 
       {object?.content && (
@@ -83,9 +81,7 @@ const CitationDemo = () => {
               const citationMatch = part.match(/\[(\d+)\]/);
               if (citationMatch) {
                 const citationNumber = citationMatch[1];
-                const citation = object.citations?.find(
-                  (c: any) => c.number === citationNumber,
-                );
+                const citation = object.citations?.find((c: any) => c.number === citationNumber);
 
                 if (citation) {
                   return (
@@ -107,9 +103,7 @@ const CitationDemo = () => {
                                   description={citation.description}
                                 />
                                 {citation.quote && (
-                                  <InlineCitationQuote>
-                                    {citation.quote}
-                                  </InlineCitationQuote>
+                                  <InlineCitationQuote>{citation.quote}</InlineCitationQuote>
                                 )}
                               </InlineCitationCarouselItem>
                             </InlineCitationCarouselContent>
@@ -147,7 +141,7 @@ export const citationSchema = z.object({
       url: z.string(),
       description: z.string().optional(),
       quote: z.string().optional(),
-    }),
+    })
   ),
 });
 

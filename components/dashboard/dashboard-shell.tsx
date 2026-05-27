@@ -92,13 +92,7 @@ const PanelLeftIcon = () => (
   </svg>
 );
 
-function SidebarUserCard({
-  user,
-  collapsed,
-}: {
-  user: UserMenuUser;
-  collapsed: boolean;
-}) {
+function SidebarUserCard({ user, collapsed }: { user: UserMenuUser; collapsed: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -173,9 +167,7 @@ function SidebarUserCard({
         <div
           className={cn(
             "absolute z-50 rounded-lg border border-border bg-card py-1 shadow-lg",
-            collapsed
-              ? "bottom-0 left-full ml-2 w-52"
-              : "bottom-full left-1 right-1 mb-1"
+            collapsed ? "bottom-0 left-full ml-2 w-52" : "bottom-full left-1 right-1 mb-1"
           )}
           role="menu"
         >
