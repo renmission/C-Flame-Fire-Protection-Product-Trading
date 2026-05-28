@@ -16,8 +16,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "C'FLAME",
-  description: "C'FLAME Fire Protection Product Trading — Internal management platform",
+  title: "C'Flame Fire Protection Product Trading",
+  description: "C'FLAME Fire Protection Product Trading is a leading supplier of high-quality fire protection products, offering a wide range of solutions to meet the needs of our customers. We are committed to providing exceptional service and support to ensure the safety and satisfaction of our clients.",
   icons: {
     icon: "/favicon.ico",
   },
