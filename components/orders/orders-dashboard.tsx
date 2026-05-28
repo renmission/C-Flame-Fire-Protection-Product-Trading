@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Printer } from "lucide-react";
 import { getErrorMessage } from "@/lib/errors";
 import { can, PERMISSIONS, type SessionUser } from "@/lib/auth/permissions";
 import { orderStatuses } from "@/lib/db/schema";
@@ -74,6 +75,15 @@ function formatDate(iso: string) {
     month: "short",
     day: "numeric",
   });
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function useDebouncedValue<T>(value: T, delay: number): T {
@@ -281,6 +291,7 @@ export function OrdersDashboard({ user }: { user: SessionUser | null }) {
                     <span className="text-sm text-muted-foreground">Show</span>
                     <select
                       className="input-select h-9 min-w-[5rem]"
+                      aria-label="Rows per page"
                       value={limit}
                       onChange={(e) => {
                         setLimit(Number(e.target.value));
@@ -467,6 +478,7 @@ function CreateOrderDialog({
               <Label htmlFor="customer">Customer *</Label>
               <select
                 id="customer"
+                title="Customer"
                 className="input-select mt-1 w-full"
                 value={customerId}
                 onChange={(e) => setCustomerId(e.target.value)}
@@ -641,6 +653,95 @@ function OrderDetailDialog({ order, onClose }: { order: OrderListItem; onClose: 
 
   const grandTotal = detail?.items.reduce((sum, i) => sum + parseFloat(i.subtotal), 0) ?? 0;
 
+  const handlePrintReceipt = () => {
+    if (!detail) return;
+    const w = window.open("", "_blank");
+    if (!w) {
+      alert("Please allow popups for this site to print receipts.");
+      return;
+    }
+    w.document.write(
+      '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Receipt</title></head><body style="font-family:system-ui;padding:2rem;text-align:center;color:#666;">Loading…</body></html>'
+    );
+    w.document.close();
+
+    const logoUrl = `${window.location.origin}/logo.png`;
+    const date = new Date(detail.createdAt).toLocaleDateString("en-PH", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    const itemsHtml = detail.items
+      .map((item) => {
+        const unitPrice = parseFloat(String(item.unitPrice));
+        const subtotal = parseFloat(String(item.subtotal));
+        return `<div class="item-row"><div class="item-main"><div class="item-name">${escapeHtml(item.productName ?? "—")}</div><div class="item-meta">Qty ${item.quantity} × ₱${unitPrice.toFixed(2)}</div></div><div class="item-amount">₱${subtotal.toFixed(2)}</div></div>`;
+      })
+      .join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Receipt - ${escapeHtml(detail.orderNumber)}</title>
+<style>
+  *{box-sizing:border-box;}
+  body{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;max-width:320px;margin:0 auto;padding:12px;font-size:12px;color:#111;background:#fff;}
+  .receipt-header{text-align:center;margin-bottom:8px;}
+  .logo{width:64px;height:64px;object-fit:contain;margin-bottom:6px;}
+  .company-name{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.05em;line-height:1.3;}
+  .company-address{font-size:10px;color:#555;margin-top:3px;line-height:1.5;}
+  .receipt-meta{font-size:11px;color:#555;margin-top:3px;}
+  .section-title{margin:8px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#555;}
+  .divider{border-top:1px dashed #ccc;margin:6px 0;}
+  .line-items{padding:4px 0;}
+  .item-row{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;}
+  .item-main{flex:1;min-width:0;}
+  .item-name{font-weight:500;word-break:break-word;}
+  .item-meta{font-size:11px;color:#666;margin-top:1px;}
+  .item-amount{white-space:nowrap;text-align:right;}
+  .totals{margin-top:4px;}
+  .totals-row{display:flex;justify-content:space-between;margin-top:2px;}
+  .totals-row.total{font-weight:700;border-top:1px solid #000;padding-top:4px;margin-top:4px;font-size:13px;}
+  .footer{margin-top:16px;text-align:center;font-size:11px;color:#555;line-height:1.5;}
+</style></head><body>
+<div class="receipt-header">
+  <img src="${logoUrl}" class="logo" alt="" onerror="this.style.display='none'" />
+  <div class="company-name">C'Flame Fire Protection<br>Product Trading</div>
+  <div class="company-address">MPJR BLDG General Malvar Ave, Poblacion 4<br>Santo Tomas, Philippines 4234</div>
+</div>
+<div class="divider"></div>
+<div style="text-align:center;">
+  <div class="receipt-meta">Order Receipt</div>
+  <div class="receipt-meta"><strong>${escapeHtml(detail.orderNumber)}</strong></div>
+  <div class="receipt-meta">${escapeHtml(date)}</div>
+</div>
+${detail.customerName ? `<div class="divider"></div><div class="section-title">Customer</div><div style="font-size:11px;"><strong>${escapeHtml(detail.customerName)}</strong>${detail.customerAddress ? `<div style="color:#555;margin-top:2px;">${escapeHtml(detail.customerAddress)}</div>` : ""}${detail.customerPhone ? `<div style="color:#555;">${escapeHtml(detail.customerPhone)}</div>` : ""}</div>` : ""}
+<div class="divider"></div>
+<div class="section-title">Items</div>
+<div class="line-items">${itemsHtml}</div>
+<div class="divider"></div>
+<div class="totals">
+  <div class="totals-row total"><span>Total</span><span>₱${grandTotal.toFixed(2)}</span></div>
+</div>
+${detail.notes ? `<div class="divider"></div><div class="section-title">Notes</div><div style="font-size:11px;">${escapeHtml(detail.notes)}</div>` : ""}
+<div class="footer">Thank you for your business.</div>
+</body></html>`;
+
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => {
+      w.print();
+      w.onafterprint = () => w.close();
+      setTimeout(() => {
+        try {
+          if (!w.closed) w.close();
+        } catch {
+          // ignore
+        }
+      }, 1000);
+    }, 150);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-6">
       <div className="w-full h-[95vh] sm:h-auto sm:max-w-2xl sm:max-h-[90vh] flex flex-col bg-background shadow-xl rounded-t-2xl sm:rounded-xl border border-border overflow-hidden">
@@ -740,8 +841,17 @@ function OrderDetailDialog({ order, onClose }: { order: OrderListItem; onClose: 
           )}
         </div>
 
-        <div className="shrink-0 border-t p-4 sm:p-6">
-          <Button variant="outline" onClick={onClose} className="w-full">
+        <div className="shrink-0 border-t p-4 sm:p-6 flex gap-3">
+          <Button
+            variant="outline"
+            onClick={handlePrintReceipt}
+            disabled={!detail}
+            className="flex-1 gap-2"
+          >
+            <Printer className="h-4 w-4" />
+            Print Receipt
+          </Button>
+          <Button variant="outline" onClick={onClose} className="flex-1">
             Close
           </Button>
         </div>
@@ -820,6 +930,7 @@ function UpdateStatusDialog({
                   className="input-select mt-1 w-full"
                   value={status}
                   onChange={(e) => setStatus(e.target.value as OrderStatus)}
+                  title="Select new order status"
                 >
                   {allowedStatuses.map((s) => (
                     <option key={s} value={s}>

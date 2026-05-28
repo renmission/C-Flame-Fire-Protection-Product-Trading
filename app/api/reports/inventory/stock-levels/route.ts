@@ -93,16 +93,17 @@ export async function GET(req: NextRequest) {
         filters,
         data,
         columns: [
-          { key: "sku", label: "SKU" },
-          { key: "name", label: "Product Name" },
-          { key: "category", label: "Category" },
-          { key: "unit", label: "Unit" },
-          { key: "quantity", label: "Current Quantity", align: "right" },
-          { key: "reorderLevel", label: "Reorder Level", align: "right" },
+          { key: "sku", label: "SKU", width: 65 },
+          { key: "name", label: "Product Name", width: 160 },
+          { key: "category", label: "Category", width: 100 },
+          { key: "unit", label: "Unit", width: 30 },
+          { key: "quantity", label: "Current Qty", align: "right", width: 55 },
+          { key: "reorderLevel", label: "Reorder Lvl", align: "right", width: 55 },
           {
             key: "lowStock",
             label: "Low Stock",
             format: (val) => (val ? "Yes" : "No"),
+            width: 40,
           },
         ],
       });

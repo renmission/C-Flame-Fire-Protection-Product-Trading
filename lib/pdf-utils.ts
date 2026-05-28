@@ -2,7 +2,7 @@
  * Utility functions for generating PDF documents using pdf-lib.
  */
 
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFFont, rgb, StandardFonts } from "pdf-lib";
 
 export function escapeHtml(text: string | number | null | undefined): string {
   if (text === null || text === undefined) return "";
@@ -65,11 +65,29 @@ export interface PdfReportOptions {
   }>;
 }
 
+function wrapText(text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] {
+  if (!text) return [""];
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (font.widthOfTextAtSize(candidate, fontSize) > maxWidth && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) lines.push(current);
+  return lines.length > 0 ? lines : [""];
+}
+
 export async function generateReportPdf(options: PdfReportOptions): Promise<Buffer> {
   const { title, subtitle, generatedAt, filters, data, columns } = options;
 
   const pdfDoc = await PDFDocument.create();
-  let currentPage = pdfDoc.addPage([595, 842]); // A4 size in points
+  let currentPage = pdfDoc.addPage([595, 842]); // A4
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
@@ -77,13 +95,12 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
   const pageWidth = currentPage.getWidth() - margin * 2;
   let y = currentPage.getHeight() - margin;
 
-  // Helper function to draw text
   const drawText = (
     text: string,
     x: number,
     yPos: number,
-    options: {
-      font?: typeof helveticaFont | typeof helveticaBoldFont;
+    opts: {
+      font?: PDFFont;
       size?: number;
       color?: ReturnType<typeof rgb>;
       align?: "left" | "center" | "right";
@@ -95,26 +112,17 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
       size = 10,
       color = rgb(0, 0, 0),
       align = "left",
-      maxWidth = pageWidth,
-    } = options;
+      maxWidth: mw = pageWidth,
+    } = opts;
 
     let finalX = x;
     if (align === "center") {
-      const textWidth = font.widthOfTextAtSize(text, size);
-      finalX = x + (maxWidth - textWidth) / 2;
+      finalX = x + (mw - font.widthOfTextAtSize(text, size)) / 2;
     } else if (align === "right") {
-      const textWidth = font.widthOfTextAtSize(text, size);
-      finalX = x + maxWidth - textWidth;
+      finalX = x + mw - font.widthOfTextAtSize(text, size);
     }
 
-    currentPage.drawText(text, {
-      x: finalX,
-      y: yPos,
-      size,
-      font,
-      color,
-      maxWidth,
-    });
+    currentPage.drawText(text, { x: finalX, y: yPos, size, font, color });
   };
 
   // Title
@@ -140,7 +148,7 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
   // Filters
   if (filters && Object.keys(filters).length > 0) {
     const filterText = Object.entries(filters)
-      .filter(([_, value]) => value)
+      .filter(([, value]) => value)
       .map(([key, value]) => `${key}: ${value}`)
       .join(" | ");
     drawText(filterText, margin, y, {
@@ -170,42 +178,63 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
       maxWidth: pageWidth,
     });
   } else {
-    // Calculate column widths
     const totalWidth = columns.reduce((sum, col) => sum + (col.width || 100), 0);
     const scale = (pageWidth - 20) / totalWidth;
     const colWidths = columns.map((col) => (col.width || 100) * scale - 5);
 
-    const rowHeight = 20;
-    const headerHeight = 25;
+    const FONT_SIZE = 9;
+    const LINE_HEIGHT = 12;
+    const CELL_SIDE_PAD = 3;
 
-    // Table header
-    let x = margin;
-    currentPage.drawRectangle({
-      x: margin,
-      y: y - headerHeight,
-      width: pageWidth,
-      height: headerHeight,
-      color: rgb(0.12, 0.16, 0.22), // #1f2937
-    });
+    // Pre-wrap header labels to compute header height
+    const headerLabelLines = columns.map((col, idx) =>
+      wrapText(col.label.toUpperCase(), helveticaBoldFont, 8, colWidths[idx] - CELL_SIDE_PAD * 2)
+    );
+    const maxHeaderLines = Math.max(...headerLabelLines.map((l) => l.length));
+    const headerHeight = maxHeaderLines * 11 + 10;
 
-    columns.forEach((col, idx) => {
-      drawText(col.label.toUpperCase(), x + 3, y - 18, {
-        font: helveticaBoldFont,
-        size: 9,
-        color: rgb(1, 1, 1),
-        maxWidth: colWidths[idx],
+    const drawTableHeader = () => {
+      currentPage.drawRectangle({
+        x: margin,
+        y: y - headerHeight,
+        width: pageWidth,
+        height: headerHeight,
+        color: rgb(0.12, 0.16, 0.22),
       });
-      x += colWidths[idx] + 5;
-    });
+      let x = margin;
+      columns.forEach((col, idx) => {
+        headerLabelLines[idx].forEach((line, lineIdx) => {
+          currentPage.drawText(line, {
+            x: x + CELL_SIDE_PAD,
+            y: y - 8 - lineIdx * 11,
+            size: 8,
+            font: helveticaBoldFont,
+            color: rgb(1, 1, 1),
+          });
+        });
+        x += colWidths[idx] + 5;
+      });
+      y -= headerHeight + 5;
+    };
 
-    y -= headerHeight + 5;
+    drawTableHeader();
 
-    // Table rows
     data.forEach((row, rowIdx) => {
-      // Check if we need a new page
-      if (y < margin + rowHeight) {
+      // Pre-wrap all cells in this row
+      const cellLines = columns.map((col, colIdx) => {
+        const value = row[col.key];
+        const text = col.format ? col.format(value) : String(value ?? "");
+        return wrapText(text, helveticaFont, FONT_SIZE, colWidths[colIdx] - CELL_SIDE_PAD * 2);
+      });
+
+      const numLines = Math.max(...cellLines.map((l) => l.length));
+      const rowHeight = numLines * LINE_HEIGHT + 8;
+
+      // Page break: check before drawing
+      if (y - rowHeight < margin + headerHeight + 20) {
         currentPage = pdfDoc.addPage([595, 842]);
         y = 842 - margin;
+        drawTableHeader();
       }
 
       // Alternate row background
@@ -215,25 +244,38 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
           y: y - rowHeight,
           width: pageWidth,
           height: rowHeight,
-          color: rgb(0.98, 0.98, 0.98), // #fafafa
+          color: rgb(0.98, 0.98, 0.98),
         });
       }
 
-      x = margin;
+      // Draw cell text line by line
+      let x = margin;
       columns.forEach((col, colIdx) => {
-        const value = row[col.key];
-        const formatted = col.format ? col.format(value) : String(value ?? "");
+        const lines = cellLines[colIdx];
+        const colWidth = colWidths[colIdx];
         const align = col.align || "left";
 
-        drawText(formatted, x + 3, y - 15, {
-          size: 9,
-          maxWidth: colWidths[colIdx],
-          align: align as "left" | "center" | "right",
+        lines.forEach((line, lineIdx) => {
+          let textX = x + CELL_SIDE_PAD;
+          if (align === "right") {
+            textX = x + colWidth - CELL_SIDE_PAD - helveticaFont.widthOfTextAtSize(line, FONT_SIZE);
+          } else if (align === "center") {
+            textX = x + (colWidth - helveticaFont.widthOfTextAtSize(line, FONT_SIZE)) / 2;
+          }
+
+          currentPage.drawText(line, {
+            x: Math.max(x + CELL_SIDE_PAD, textX),
+            y: y - 15 - lineIdx * LINE_HEIGHT,
+            size: FONT_SIZE,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
         });
-        x += colWidths[colIdx] + 5;
+
+        x += colWidth + 5;
       });
 
-      // Row border
+      // Row separator
       currentPage.drawLine({
         start: { x: margin, y: y - rowHeight },
         end: { x: margin + pageWidth, y: y - rowHeight },
@@ -246,7 +288,11 @@ export async function generateReportPdf(options: PdfReportOptions): Promise<Buff
   }
 
   // Footer
-  y -= 30;
+  y -= 20;
+  if (y < margin + 15) {
+    currentPage = pdfDoc.addPage([595, 842]);
+    y = 50;
+  }
   drawText(`C'FLAME - Generated on ${formatDateTime(generatedAt)}`, margin, y, {
     size: 8,
     color: rgb(0.6, 0.6, 0.6),
