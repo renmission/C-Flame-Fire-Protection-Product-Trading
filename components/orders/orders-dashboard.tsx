@@ -107,15 +107,33 @@ export function OrdersDashboard({ user }: { user: SessionUser | null }) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");
+  const [customerInput, setCustomerInput] = useState("");
+  const [customerFilterId, setCustomerFilterId] = useState("");
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [dialog, setDialog] = useState<DialogState>(null);
 
   const debouncedSearch = useDebouncedValue(search, 300);
+  const debouncedCustomerInput = useDebouncedValue(customerInput, 300);
   const queryClient = useQueryClient();
+
+  const { data: filterCustomersData } = useQuery({
+    queryKey: ["customers-filter", { search: debouncedCustomerInput, limit: 20 }],
+    queryFn: () =>
+      fetchCustomers({ search: debouncedCustomerInput.trim() || undefined, limit: 20 }),
+    enabled: showCustomerDropdown,
+  });
+  const filterCustomers = filterCustomersData?.data ?? [];
 
   const { data: ordersData, isLoading } = useQuery({
     queryKey: [
       ...ORDERS_QUERY_KEY,
-      { search: debouncedSearch, page, limit, status: statusFilter || undefined },
+      {
+        search: debouncedSearch,
+        page,
+        limit,
+        status: statusFilter || undefined,
+        customerId: customerFilterId || undefined,
+      },
     ],
     queryFn: () =>
       fetchOrders({
@@ -123,6 +141,7 @@ export function OrdersDashboard({ user }: { user: SessionUser | null }) {
         page,
         limit,
         status: statusFilter || undefined,
+        customerId: customerFilterId || undefined,
         sortBy: "createdAt",
         sortOrder: "desc",
       }),
@@ -167,7 +186,7 @@ export function OrdersDashboard({ user }: { user: SessionUser | null }) {
 
       <Card>
         <CardHeader className="pb-4 p-4 sm:p-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+          <div className="flex flex-row flex-wrap gap-2 items-center">
             <Input
               placeholder="Search by order number…"
               value={search}
@@ -175,11 +194,11 @@ export function OrdersDashboard({ user }: { user: SessionUser | null }) {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full min-h-11 touch-manipulation sm:max-w-xs sm:min-h-0"
+              className="h-9 w-44"
               aria-label="Search orders"
             />
             <select
-              className="input-select h-9 min-w-[10rem]"
+              className="input-select h-9 w-36"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value as OrderStatus | "");
@@ -194,6 +213,55 @@ export function OrdersDashboard({ user }: { user: SessionUser | null }) {
                 </option>
               ))}
             </select>
+            <div className="relative">
+              <Input
+                placeholder="Filter by customer…"
+                value={customerInput}
+                onChange={(e) => {
+                  setCustomerInput(e.target.value);
+                  if (customerFilterId) setCustomerFilterId("");
+                  setShowCustomerDropdown(true);
+                  setPage(1);
+                }}
+                onFocus={() => setShowCustomerDropdown(true)}
+                onBlur={() => setTimeout(() => setShowCustomerDropdown(false), 150)}
+                className="h-9 w-52 pr-7"
+                aria-label="Filter by customer"
+              />
+              {(customerInput || customerFilterId) && (
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-lg leading-none"
+                  onClick={() => {
+                    setCustomerInput("");
+                    setCustomerFilterId("");
+                    setPage(1);
+                  }}
+                  aria-label="Clear customer filter"
+                >
+                  ×
+                </button>
+              )}
+              {showCustomerDropdown && filterCustomers.length > 0 && (
+                <div className="absolute z-10 mt-1 w-full min-w-[12rem] bg-background border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                  {filterCustomers.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                      onMouseDown={() => {
+                        setCustomerInput(c.name);
+                        setCustomerFilterId(c.id);
+                        setShowCustomerDropdown(false);
+                        setPage(1);
+                      }}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0 sm:p-6 sm:pt-0">
