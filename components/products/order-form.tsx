@@ -51,6 +51,78 @@ const BATANGAS_LOCATIONS = [
   "Santo Tomas", "Taal", "Tanauan City", "Taysan", "Tingloy", "Tuy",
 ] as const;
 
+const BATANGAS_BARANGAYS: Record<string, string[]> = {
+  "Malvar": [
+    "Alalum", "Ampid", "Ayusan", "Banaba", "Banga", "Bano", "Bulakin",
+    "Bulilan Norte", "Bulilan Sur", "Camandag", "Dulangan", "Luta Norte",
+    "Luta Sur", "Poblacion", "San Andres", "San Fernando", "San Gregorio",
+    "San Pablo", "Talisay", "Tambo",
+  ],
+  "Lipa City": [
+    "Barangay 1", "Barangay 2", "Barangay 3", "Barangay 4", "Barangay 5",
+    "Barangay 6", "Barangay 7", "Barangay 8", "Barangay 9",
+    "Adya", "Anilao-Labac", "Antipolo del Norte", "Antipolo del Sur",
+    "Bagong Pook", "Balintawak", "Banay-Banay", "Bolbok", "Bugtong na Pulo",
+    "Bulacnin", "Calamias", "Cumba", "Dagatan", "Duhatan", "Halang",
+    "Inosluban", "Kayumanggi", "Latag", "Lodlod", "Lumbang", "Mabini",
+    "Malapit", "Malitlit", "Marawoy", "Mataas na Lupa", "Munting Pulo",
+    "Pagolingin Bata", "Pagolingin Matanda", "Pangao", "Pinagkawitan",
+    "Pinagtongulan", "Plaridel", "Quezon", "Rizal", "Sabang", "Sampaguita",
+    "San Benito", "San Carlos", "San Celestino", "San Francisco",
+    "San Guillermo", "San Jose", "San Lucas", "San Salvador", "San Sebastian",
+    "Santa Cruz", "Santiago", "Santol", "Sico", "Talisay", "Tambo",
+    "Tangob", "Tanguay", "Tibig", "Tipacan",
+  ],
+  "Tanauan City": [
+    "Bagbag", "Bagumbayan", "Balele", "Banjo East", "Banjo West",
+    "Bilog-Bilog", "Boot", "Buga-Mangga", "Bulakin", "Bulihan", "Bulsa",
+    "Caloocan Norte", "Caloocan Sur", "Darasa", "Gonzales", "Hidalgo",
+    "Janopol", "Janopol Oriental", "Laurel", "Leynes", "Luta", "Maria Paz",
+    "Muzon", "Natatas", "Pagaspas", "Pantay Bata", "Pantay Matanda", "Pila",
+    "Pinagtatapan",
+    "Poblacion Barangay 1", "Poblacion Barangay 2", "Poblacion Barangay 3",
+    "Poblacion Barangay 4", "Poblacion Barangay 5", "Poblacion Barangay 6",
+    "Poblacion Barangay 7", "Poblacion Barangay 8", "Poblacion Barangay 9",
+    "Poblacion Barangay 10", "Poblacion Barangay 11", "Poblacion Barangay 12",
+    "Pook", "Sala", "San Jose", "Sandaligan", "Santa Cruz", "Santiago",
+    "Santol", "Sapac", "Sico", "Sulong", "Talaga", "Tinurik", "Trapiche",
+    "Ulango",
+  ],
+  "Santo Tomas": [
+    "Biga", "Bilog-Bilog", "Cunta", "Dahilig", "Dao", "Guinobatan",
+    "Kaparangan", "Mabato", "Mahayahay", "Makiling", "Malawaan", "Paliparan",
+    "Poblacion", "San Antonio", "San Bartolome", "San Francisco",
+    "San Isidro Norte", "San Isidro Sur", "San Jose", "San Juan", "San Pablo",
+    "San Pedro", "San Vicente", "Santa Clara", "Santa Cruz", "Santo Niño",
+  ],
+  "Laurel": [
+    "Alas-asin", "Bugaan East", "Bugaan West", "Gulod", "Niyugan",
+    "Poblacion", "Quisumbing", "San Gabriel", "Santa Maria",
+  ],
+  "Batangas City": [
+    "Alangilan", "Balagtas", "Balete", "Banaba Center", "Banaba Ibaba",
+    "Banaba Kanluran", "Banaba Silangan", "Bolbok", "Bucal", "Calicanto",
+    "Conde Itaas", "Conde Labak", "Cuta", "Dalig", "Dela Paz Proper",
+    "Dela Paz Pulot Centro", "Dela Paz Pulot Itaas", "Dela Paz Pulot Aplaya",
+    "Domoclay", "Dumuclay", "Gulod Itaas", "Gulod Labak", "Ilustre",
+    "Kumintang Ibaba", "Kumintang Ilaya", "Libjo", "Liponpon", "Maapaz",
+    "Mabacong", "Malibayo", "Malitam", "Maruclap", "Nangka",
+    "Pallocan Kanluran", "Pallocan Silangan", "Pinamucan Ibaba",
+    "Pinamucan Proper", "Pinamucan Silangan",
+    "Poblacion Barangay 1", "Poblacion Barangay 2", "Poblacion Barangay 3",
+    "Poblacion Barangay 4", "Poblacion Barangay 5", "Poblacion Barangay 6",
+    "Poblacion Barangay 7", "Poblacion Barangay 8", "Poblacion Barangay 9",
+    "Poblacion Barangay 10",
+    "San Agapito", "San Agustin Kanluran", "San Agustin Silangan",
+    "San Andres", "San Isidro", "San Jose Sico", "San Miguel", "San Pedro",
+    "Santa Clara", "Santa Rita Aplaya", "Santa Rita Karsada", "Santo Domingo",
+    "Santo Niño", "Simlong", "Sirang Lupa", "Sorosoro Ibaba", "Sorosoro Ilaya",
+    "Sorosoro Karsada", "Tabangao Aplaya", "Tabangao Ambulong", "Tabangao Dao",
+    "Talahib Pandayan", "Talahib Payapa", "Talumpok Kanluran",
+    "Talumpok Silangan", "Tinga Itaas", "Tinga Labak", "Tulo", "Wawa",
+  ],
+};
+
 const GCASH_NUMBERS = [
   { number: "09123654789", name: "Jaybee S." },
   { number: "09987456321", name: "Panday B." },
@@ -76,6 +148,7 @@ export function OrderForm({ user }: { user: UserInfo }) {
   const [customerName, setCustomerName] = useState(user.name ?? "");
   const [contact, setContact] = useState("");
   const [municipality, setMunicipality] = useState("");
+  const [barangay, setBarangay] = useState("");
   const [addressDetails, setAddressDetails] = useState("");
   const [paymentMode, setPaymentMode] = useState<PaymentMode>("Cash");
   const [gcashRef, setGcashRef] = useState("");
@@ -89,6 +162,8 @@ export function OrderForm({ user }: { user: UserInfo }) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => { setBarangay(""); }, [municipality]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -171,7 +246,9 @@ export function OrderForm({ user }: { user: UserInfo }) {
         body: JSON.stringify({
           customerName: customerName.trim(),
           contact: contact.trim(),
-          address: `${addressDetails.trim()}, ${municipality}`,
+          address: barangay
+            ? `${addressDetails.trim()}, Brgy. ${barangay}, ${municipality}`
+            : `${addressDetails.trim()}, ${municipality}`,
           paymentMode,
           gcashRef: gcashRef.trim() || undefined,
           items: orderItems.map((i) => ({
@@ -297,7 +374,7 @@ export function OrderForm({ user }: { user: UserInfo }) {
                     type="tel"
                   />
                 </div>
-                <div className="grid gap-2">
+                <div className="grid gap-2 sm:col-span-2">
                   <Label htmlFor="municipality">Municipality / City *</Label>
                   <select
                     id="municipality"
@@ -317,13 +394,35 @@ export function OrderForm({ user }: { user: UserInfo }) {
                     ))}
                   </select>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="addressDetails">Street / Barangay / House No. *</Label>
+                {BATANGAS_BARANGAYS[municipality] && (
+                  <div className="grid gap-2 sm:col-span-2">
+                    <Label htmlFor="barangay">Barangay *</Label>
+                    <select
+                      id="barangay"
+                      title="Barangay"
+                      value={barangay}
+                      onChange={(e) => setBarangay(e.target.value)}
+                      required
+                      className={cn(
+                        "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+                        "ring-offset-background focus-visible:outline-none focus-visible:ring-2",
+                        "focus-visible:ring-ring focus-visible:ring-offset-2"
+                      )}
+                    >
+                      <option value="">Select barangay…</option>
+                      {BATANGAS_BARANGAYS[municipality].map((brgy) => (
+                        <option key={brgy} value={brgy}>{brgy}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <div className="grid gap-2 sm:col-span-2">
+                  <Label htmlFor="addressDetails">House No. / Street *</Label>
                   <Input
                     id="addressDetails"
                     value={addressDetails}
                     onChange={(e) => setAddressDetails(e.target.value)}
-                    placeholder="e.g. 123 Rizal St., Brgy. Poblacion"
+                    placeholder="e.g. 123 Rizal St."
                     required
                   />
                 </div>
