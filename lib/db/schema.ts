@@ -657,3 +657,46 @@ export const payments = pgTable(
     saleIdIdx: index("payment_sale_id_idx").on(table.saleId),
   })
 );
+
+// --- Installation Services ---
+
+export const installationServiceStatuses = [
+  "pending",
+  "in_progress",
+  "completed",
+  "cancelled",
+] as const;
+export type InstallationServiceStatus = (typeof installationServiceStatuses)[number];
+
+export const installationFeeTypes = ["preset", "custom"] as const;
+export type InstallationFeeType = (typeof installationFeeTypes)[number];
+
+export const installationServices = pgTable(
+  "installation_service",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    serviceDate: timestamp("service_date", { mode: "date" }).notNull(),
+    customerId: text("customer_id").references(() => customers.id, { onDelete: "set null" }),
+    customerName: text("customer_name").notNull(),
+    customerAddress: text("customer_address").notNull(),
+    customerPhone: text("customer_phone"),
+    customerEmail: text("customer_email"),
+    feeType: text("fee_type").$type<InstallationFeeType>().notNull().default("preset"),
+    feePreset: text("fee_preset"), // "500"|"1000"|"2500"|"5000"|"10000"
+    feeCustom: decimal("fee_custom", { precision: 12, scale: 2 }),
+    feeAmount: decimal("fee_amount", { precision: 12, scale: 2 }).notNull(),
+    status: text("status").$type<InstallationServiceStatus>().notNull().default("pending"),
+    notes: text("notes"),
+    createdById: text("created_by_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (t) => ({
+    statusIdx: index("installation_service_status_idx").on(t.status),
+    customerIdIdx: index("installation_service_customer_id_idx").on(t.customerId),
+    createdAtIdx: index("installation_service_created_at_idx").on(t.createdAt),
+    serviceDateIdx: index("installation_service_service_date_idx").on(t.serviceDate),
+  })
+);
