@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -974,6 +975,12 @@ function PayslipViewDialog({ payslipId, onClose }: { payslipId: string; onClose:
               padding-bottom: 16px;
               margin-bottom: 24px;
             }
+            .header img {
+              width: 80px;
+              height: 80px;
+              object-fit: contain;
+              margin-bottom: 8px;
+            }
             .header h2 {
               font-size: 24px;
               font-weight: bold;
@@ -1074,6 +1081,7 @@ function PayslipViewDialog({ payslipId, onClose }: { payslipId: string; onClose:
         <body>
           <div class="payslip-container">
             <div class="header">
+              <img src="${window.location.origin}/logo.png" alt="C'FLAME Logo" />
               <h2>C'FLAME</h2>
               <p>PAYSLIP</p>
             </div>
@@ -1214,6 +1222,9 @@ function PayslipViewDialog({ payslipId, onClose }: { payslipId: string; onClose:
               <div className="border-2 border-gray-800 rounded-lg p-6 bg-white shadow-lg">
                 {/* Header */}
                 <div className="text-center border-b-2 border-gray-800 pb-4 mb-6">
+                  <div className="flex justify-center mb-2">
+                    <Image src="/logo.png" alt="C'FLAME Logo" width={80} height={80} className="object-contain" />
+                  </div>
                   <h2 className="text-2xl font-bold">C&apos;FLAME</h2>
                   <p className="text-sm text-muted-foreground mt-1">PAYSLIP</p>
                 </div>
