@@ -42,6 +42,15 @@ type UserInfo = {
 const PAYMENT_MODES = ["Cash", "GCash"] as const;
 type PaymentMode = (typeof PAYMENT_MODES)[number];
 
+const BATANGAS_LOCATIONS = [
+  "Agoncillo", "Alitagtag", "Balayan", "Bauan", "Batangas City",
+  "Calaca", "Calatagan", "Cuenca", "Ibaan", "Laurel", "Lemery",
+  "Lian", "Lipa City", "Lobo", "Mabini", "Malvar", "Mataas na Kahoy",
+  "Nasugbu", "Padre Garcia", "Rosario", "San Jose", "San Juan",
+  "San Luis", "San Nicolas", "San Pascual", "Santa Teresita",
+  "Santo Tomas", "Taal", "Tanauan City", "Taysan", "Tingloy", "Tuy",
+] as const;
+
 const GCASH_NUMBERS = [
   { number: "09123654789", name: "Jaybee S." },
   { number: "09987456321", name: "Panday B." },
@@ -66,7 +75,8 @@ function formatCurrency(value: number) {
 export function OrderForm({ user }: { user: UserInfo }) {
   const [customerName, setCustomerName] = useState(user.name ?? "");
   const [contact, setContact] = useState("");
-  const [address, setAddress] = useState("");
+  const [municipality, setMunicipality] = useState("");
+  const [addressDetails, setAddressDetails] = useState("");
   const [paymentMode, setPaymentMode] = useState<PaymentMode>("Cash");
   const [gcashRef, setGcashRef] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -161,7 +171,7 @@ export function OrderForm({ user }: { user: UserInfo }) {
         body: JSON.stringify({
           customerName: customerName.trim(),
           contact: contact.trim(),
-          address: address.trim(),
+          address: `${addressDetails.trim()}, ${municipality}`,
           paymentMode,
           gcashRef: gcashRef.trim() || undefined,
           items: orderItems.map((i) => ({
@@ -287,27 +297,41 @@ export function OrderForm({ user }: { user: UserInfo }) {
                     type="tel"
                   />
                 </div>
-                <div className="grid gap-2 sm:col-span-2">
-                  <Label htmlFor="address">Delivery Address *</Label>
-                  <textarea
-                    id="address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="House no., Street, Barangay, City, Province"
+                <div className="grid gap-2">
+                  <Label htmlFor="municipality">Municipality / City *</Label>
+                  <select
+                    id="municipality"
+                    title="Municipality / City"
+                    value={municipality}
+                    onChange={(e) => setMunicipality(e.target.value)}
                     required
-                    rows={3}
                     className={cn(
-                      "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
-                      "ring-offset-background placeholder:text-muted-foreground",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                      "resize-none"
+                      "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+                      "ring-offset-background focus-visible:outline-none focus-visible:ring-2",
+                      "focus-visible:ring-ring focus-visible:ring-offset-2"
                     )}
+                  >
+                    <option value="">Select municipality / city…</option>
+                    {BATANGAS_LOCATIONS.map((loc) => (
+                      <option key={loc} value={loc}>{loc}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="addressDetails">Street / Barangay / House No. *</Label>
+                  <Input
+                    id="addressDetails"
+                    value={addressDetails}
+                    onChange={(e) => setAddressDetails(e.target.value)}
+                    placeholder="e.g. 123 Rizal St., Brgy. Poblacion"
+                    required
                   />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="paymentMode">Mode of Payment *</Label>
                   <select
                     id="paymentMode"
+                    title="Mode of Payment"
                     value={paymentMode}
                     onChange={(e) => setPaymentMode(e.target.value as PaymentMode)}
                     className={cn(
@@ -461,6 +485,7 @@ export function OrderForm({ user }: { user: UserInfo }) {
                             <TableCell>
                               <button
                                 type="button"
+                                title="Remove item"
                                 onClick={() => removeItem(item.product.id)}
                                 className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                               >
