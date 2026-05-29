@@ -864,7 +864,7 @@ function PayslipViewDialog({ payslipId, onClose }: { payslipId: string; onClose:
         <body>
           <div class="payslip-container">
             <div class="header">
-              <h2>FG HOMES</h2>
+              <h2>C'FLAME</h2>
               <p>PAYSLIP</p>
             </div>
             
@@ -1002,7 +1002,7 @@ function PayslipViewDialog({ payslipId, onClose }: { payslipId: string; onClose:
               <div className="border-2 border-gray-800 rounded-lg p-6 bg-white shadow-lg">
                 {/* Header */}
                 <div className="text-center border-b-2 border-gray-800 pb-4 mb-6">
-                  <h2 className="text-2xl font-bold">FG HOMES</h2>
+                  <h2 className="text-2xl font-bold">C'FLAME</h2>
                   <p className="text-sm text-muted-foreground mt-1">PAYSLIP</p>
                 </div>
 
