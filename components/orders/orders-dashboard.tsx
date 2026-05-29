@@ -2,19 +2,18 @@
 
 import * as React from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchOrders,
   fetchOrder,
-  createOrder,
   updateOrder,
   deleteOrder,
   type OrderListItem,
   type OrderDetail,
 } from "@/lib/orders-api";
 import { fetchCustomers } from "@/lib/customers-api";
-import { fetchProducts } from "@/lib/inventory-api";
-import type { OrderFormValues, OrderUpdateValues } from "@/schemas/orders";
+import type { OrderUpdateValues } from "@/schemas/orders";
 import type { OrderStatus } from "@/lib/db/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,11 +96,11 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 
 type DialogState =
   | null
-  | "create"
   | { type: "view"; order: OrderListItem }
   | { type: "status"; order: OrderListItem };
 
 export function OrdersDashboard({ user }: { user: SessionUser | null }) {
+  const router = useRouter();
   const canWrite = user ? can(user, PERMISSIONS.ORDERS_WRITE) : false;
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -151,14 +150,6 @@ export function OrdersDashboard({ user }: { user: SessionUser | null }) {
   const total = ordersData?.total ?? 0;
   const totalPages = Math.ceil(total / limit);
 
-  const createMutation = useMutation({
-    mutationFn: createOrder,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
-      setDialog(null);
-    },
-  });
-
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, body }: { id: string; body: OrderUpdateValues }) => updateOrder(id, body),
     onSuccess: () => {
@@ -181,7 +172,9 @@ export function OrdersDashboard({ user }: { user: SessionUser | null }) {
           <h1 className="text-2xl font-bold">Orders</h1>
           <p className="text-muted-foreground">Track and manage customer orders</p>
         </div>
-        {canWrite && <Button onClick={() => setDialog("create")}>New Order</Button>}
+        {canWrite && (
+          <Button onClick={() => router.push("/dashboard/orders/new")}>New Order</Button>
+        )}
       </div>
 
       <Card>
@@ -403,15 +396,6 @@ export function OrdersDashboard({ user }: { user: SessionUser | null }) {
         </CardContent>
       </Card>
 
-      {dialog === "create" && (
-        <CreateOrderDialog
-          onClose={() => setDialog(null)}
-          onSubmit={(body) => createMutation.mutate(body)}
-          isSubmitting={createMutation.isPending}
-          error={createMutation.error ? getErrorMessage(createMutation.error) : null}
-        />
-      )}
-
       {dialog !== null && typeof dialog === "object" && dialog.type === "view" && (
         <OrderDetailDialog order={dialog.order} onClose={() => setDialog(null)} />
       )}
@@ -425,286 +409,6 @@ export function OrdersDashboard({ user }: { user: SessionUser | null }) {
           error={updateStatusMutation.error ? getErrorMessage(updateStatusMutation.error) : null}
         />
       )}
-    </div>
-  );
-}
-
-// ---- Create Order Dialog ----
-
-type OrderItemDraft = {
-  productId: string;
-  productName: string;
-  quantity: number;
-  unitPrice: number;
-};
-
-function CreateOrderDialog({
-  onClose,
-  onSubmit,
-  isSubmitting,
-  error,
-}: {
-  onClose: () => void;
-  onSubmit: (body: OrderFormValues) => void;
-  isSubmitting: boolean;
-  error: string | null;
-}) {
-  const [customerId, setCustomerId] = useState("");
-  const [notes, setNotes] = useState("");
-  const [items, setItems] = useState<OrderItemDraft[]>([]);
-  const [productSearch, setProductSearch] = useState("");
-  const [productDropdown, setProductDropdown] = useState(false);
-
-  const { data: customersData } = useQuery({
-    queryKey: ["customers", { limit: 200 }],
-    queryFn: () => fetchCustomers({ limit: 200 }),
-  });
-
-  const { data: productsData } = useQuery({
-    queryKey: ["products", { limit: 200, archived: 0 }],
-    queryFn: () => fetchProducts({ limit: 200 }),
-  });
-
-  const customers = customersData?.data ?? [];
-  const products = (productsData?.data ?? []).filter(
-    (p) =>
-      p.archived === 0 &&
-      (productSearch.trim() === "" ||
-        p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-        p.sku.toLowerCase().includes(productSearch.toLowerCase()))
-  );
-
-  const addProduct = (product: { id: string; name: string; listPrice: string | null }) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.productId === product.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
-      return [
-        ...prev,
-        {
-          productId: product.id,
-          productName: product.name,
-          quantity: 1,
-          unitPrice: product.listPrice ? parseFloat(product.listPrice) : 0,
-        },
-      ];
-    });
-    setProductSearch("");
-    setProductDropdown(false);
-  };
-
-  const removeItem = (productId: string) => {
-    setItems((prev) => prev.filter((i) => i.productId !== productId));
-  };
-
-  const updateItem = (productId: string, field: "quantity" | "unitPrice", value: number) => {
-    setItems((prev) => prev.map((i) => (i.productId === productId ? { ...i, [field]: value } : i)));
-  };
-
-  const grandTotal = items.reduce((sum, i) => sum + i.quantity * i.unitPrice, 0);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({
-      customerId,
-      notes: notes.trim() || undefined,
-      items: items.map((i) => ({
-        productId: i.productId,
-        quantity: i.quantity,
-        unitPrice: i.unitPrice,
-      })),
-    });
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-6">
-      <div className="w-full h-[95vh] sm:h-auto sm:max-w-2xl sm:max-h-[90vh] flex flex-col bg-background shadow-xl rounded-t-2xl sm:rounded-xl border border-border overflow-hidden">
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b shrink-0">
-          <h2 className="text-lg font-semibold">New Order</h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <span className="text-xl font-semibold leading-none">×</span>
-          </Button>
-        </div>
-
-        <div className="overflow-y-auto p-4 sm:p-6 flex-1">
-          {error && (
-            <div className="mb-4 p-3 rounded-md bg-destructive/10 text-destructive text-sm">
-              {error}
-            </div>
-          )}
-          <form id="create-order-form" onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <Label htmlFor="customer">Customer *</Label>
-              <select
-                id="customer"
-                title="Customer"
-                className="input-select mt-1 w-full"
-                value={customerId}
-                onChange={(e) => setCustomerId(e.target.value)}
-                required
-              >
-                <option value="">Select a customer…</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <Label>Products *</Label>
-              <div className="relative mt-1">
-                <Input
-                  placeholder="Search product by name or SKU…"
-                  value={productSearch}
-                  onChange={(e) => {
-                    setProductSearch(e.target.value);
-                    setProductDropdown(true);
-                  }}
-                  onFocus={() => setProductDropdown(true)}
-                  onBlur={() => setTimeout(() => setProductDropdown(false), 150)}
-                  autoComplete="off"
-                />
-                {productDropdown && productSearch.trim() !== "" && products.length > 0 && (
-                  <div className="absolute z-10 mt-1 w-full bg-background border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
-                    {products.slice(0, 20).map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center justify-between"
-                        onMouseDown={() => addProduct(p)}
-                      >
-                        <span>
-                          <span className="font-medium">{p.name}</span>
-                          <span className="text-muted-foreground ml-2 text-xs">{p.sku}</span>
-                        </span>
-                        {p.listPrice && (
-                          <span className="text-muted-foreground text-xs">
-                            {formatCurrency(p.listPrice)}
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {items.length > 0 && (
-                <div className="mt-3 rounded-md border border-border overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="text-left px-3 py-2 font-medium">Product</th>
-                        <th className="text-right px-3 py-2 font-medium w-20">Qty</th>
-                        <th className="text-right px-3 py-2 font-medium w-28">Unit Price</th>
-                        <th className="text-right px-3 py-2 font-medium w-24">Subtotal</th>
-                        <th className="w-8"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((item) => (
-                        <tr key={item.productId} className="border-t border-border">
-                          <td className="px-3 py-2">{item.productName}</td>
-                          <td className="px-3 py-2">
-                            <Input
-                              type="number"
-                              min={1}
-                              value={item.quantity}
-                              onChange={(e) =>
-                                updateItem(
-                                  item.productId,
-                                  "quantity",
-                                  parseInt(e.target.value) || 1
-                                )
-                              }
-                              className="h-7 text-right w-full"
-                            />
-                          </td>
-                          <td className="px-3 py-2">
-                            <Input
-                              type="number"
-                              min={0}
-                              step="0.01"
-                              value={item.unitPrice}
-                              onChange={(e) =>
-                                updateItem(
-                                  item.productId,
-                                  "unitPrice",
-                                  parseFloat(e.target.value) || 0
-                                )
-                              }
-                              className="h-7 text-right w-full"
-                            />
-                          </td>
-                          <td className="px-3 py-2 text-right tabular-nums">
-                            {formatCurrency(item.quantity * item.unitPrice)}
-                          </td>
-                          <td className="px-1 py-2">
-                            <button
-                              type="button"
-                              onClick={() => removeItem(item.productId)}
-                              className="text-muted-foreground hover:text-destructive text-lg leading-none"
-                              aria-label="Remove item"
-                            >
-                              ×
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot className="border-t border-border bg-muted/30">
-                      <tr>
-                        <td colSpan={3} className="px-3 py-2 text-right font-medium">
-                          Total
-                        </td>
-                        <td className="px-3 py-2 text-right font-semibold tabular-nums">
-                          {formatCurrency(grandTotal)}
-                        </td>
-                        <td></td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="notes">Notes</Label>
-              <textarea
-                id="notes"
-                className="input-select mt-1 w-full min-h-[72px] resize-y"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional notes…"
-              />
-            </div>
-          </form>
-        </div>
-
-        <div className="shrink-0 border-t p-4 sm:p-6 flex gap-2">
-          <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            form="create-order-form"
-            disabled={isSubmitting || items.length === 0}
-            className="flex-1"
-          >
-            {isSubmitting ? "Creating…" : "Create Order"}
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }
