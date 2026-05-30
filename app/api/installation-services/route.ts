@@ -13,6 +13,7 @@ import {
   installationServicesListQuerySchema,
   installationServiceSchema,
 } from "@/schemas/installation-services";
+import { sendInstallationBookedSMS } from "@/lib/sms";
 
 export async function GET(req: NextRequest) {
   const { user, response } = await getSessionOr401();
@@ -172,6 +173,14 @@ export async function POST(req: NextRequest) {
         { error: "Failed to create installation service" },
         { status: 500 }
       );
+    }
+
+    if (record.customerPhone) {
+      sendInstallationBookedSMS(
+        record.customerPhone,
+        record.customerName,
+        record.serviceDate
+      ).catch(console.error);
     }
 
     return Response.json(

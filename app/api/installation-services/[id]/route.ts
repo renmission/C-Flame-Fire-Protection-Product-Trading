@@ -6,6 +6,7 @@ import { getSessionOr401, requirePermission } from "@/lib/api-auth";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { withRouteErrorHandling } from "@/lib/errors";
 import { installationServiceUpdateSchema } from "@/schemas/installation-services";
+import { sendInstallationStatusSMS } from "@/lib/sms";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -139,6 +140,16 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
         .where(eq(users.id, updated.createdById))
         .limit(1);
       createdByName = creator?.name ?? null;
+    }
+
+    const statusChanged = rest.status !== undefined && rest.status !== existing.status;
+    if (statusChanged && updated.customerPhone) {
+      sendInstallationStatusSMS(
+        updated.customerPhone,
+        updated.customerName,
+        updated.serviceDate,
+        updated.status
+      ).catch(console.error);
     }
 
     return Response.json({

@@ -6,6 +6,7 @@ import { PERMISSIONS } from "@/lib/auth/permissions";
 import { withRouteErrorHandling } from "@/lib/errors";
 import { orderUpdateSchema } from "@/schemas/orders";
 import { eq } from "drizzle-orm";
+import { sendOrderStatusSMS } from "@/lib/sms";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -111,6 +112,19 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       })
       .where(eq(orders.id, id))
       .returning();
+
+    if (status !== undefined) {
+      const [cust] = await db
+        .select({ phone: customers.phone, name: customers.name })
+        .from(customers)
+        .where(eq(customers.id, updated.customerId))
+        .limit(1);
+      if (cust?.phone) {
+        sendOrderStatusSMS(cust.phone, cust.name ?? "", updated.orderNumber, updated.status).catch(
+          console.error
+        );
+      }
+    }
 
     return Response.json({
       data: {
