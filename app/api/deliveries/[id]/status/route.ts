@@ -8,6 +8,7 @@ import { deliveryStatusUpdateSchema } from "@/schemas/delivery";
 import { eq } from "drizzle-orm";
 import { STATUS_ORDER, getNextStatus } from "@/lib/delivery-workflow";
 import { createDeliveryStatusNotification } from "@/lib/notifications";
+import { sendDeliveryStatusSMS } from "@/lib/sms";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
         id: deliveries.id,
         status: deliveries.status,
         trackingNumber: deliveries.trackingNumber,
+        customerPhone: deliveries.customerPhone,
         assignedToUserId: deliveries.assignedToUserId,
         createdById: deliveries.createdById,
       })
@@ -116,6 +118,13 @@ export async function POST(req: NextRequest, context: RouteContext) {
         // Log error but don't fail the request
         console.error(`Failed to create notification for user ${userId}:`, error);
       }
+    }
+
+    // SMS the customer if phone is available
+    if (delivery.customerPhone) {
+      sendDeliveryStatusSMS(delivery.customerPhone, delivery.trackingNumber, status).catch(
+        console.error
+      );
     }
 
     return Response.json({ data: statusUpdate }, { status: 201 });

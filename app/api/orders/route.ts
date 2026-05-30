@@ -5,6 +5,7 @@ import { getSessionOr401, requirePermission } from "@/lib/api-auth";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { withRouteErrorHandling } from "@/lib/errors";
 import { ordersListQuerySchema, orderSchema } from "@/schemas/orders";
+import { sendOrderConfirmationSMS } from "@/lib/sms";
 import { and, asc, desc, eq, ilike, or, sql, inArray } from "drizzle-orm";
 
 function generateOrderNumber(): string {
@@ -182,6 +183,10 @@ export async function POST(req: NextRequest) {
     }));
 
     await db.insert(orderItems).values(lineItems);
+
+    if (customer.phone) {
+      sendOrderConfirmationSMS(customer.phone, customer.name, orderNumber).catch(console.error);
+    }
 
     return Response.json(
       {
